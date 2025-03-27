@@ -17,6 +17,8 @@ namespace SklepInternetowyWPF.Views
 
             CategoryFilterBox.ItemsSource = viewModel.Categories;
             CategoryFilterBox.SelectedIndex = 0;
+
+            UpdatePermissionUI(); // ukryj przyciski na starcie
         }
 
         private void AddProduct_Click(object sender, RoutedEventArgs e)
@@ -65,6 +67,7 @@ namespace SklepInternetowyWPF.Views
             viewModel.SelectedCategoryId = (int)(CategoryFilterBox.SelectedValue ?? 0);
             viewModel.LoadProducts();
         }
+
         private void SortByName_Click(object sender, RoutedEventArgs e)
         {
             if (viewModel.SortBy == "Name")
@@ -91,6 +94,31 @@ namespace SklepInternetowyWPF.Views
             viewModel.LoadProducts();
         }
 
+        private void LoginButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (viewModel.CurrentUser == null)
+            {
+                var login = new LoginWindow();
+                if (login.ShowDialog() == true)
+                {
+                    viewModel.CurrentUser = login.LoggedUser;
+                    LoginButton.Content = "Konto";
+                    UpdatePermissionUI();
+                }
+            }
+            else
+            {
+                MessageBox.Show($"Zalogowany jako: {viewModel.CurrentUser.Username}");
+            }
+        }
 
+        private void UpdatePermissionUI()
+        {
+            bool isAdmin = viewModel.CurrentUser?.IsAdmin == true;
+
+            AddButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
+            EditButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
+            DeleteButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
+        }
     }
 }

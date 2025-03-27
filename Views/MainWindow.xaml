@@ -7,7 +7,7 @@
             <Button Content="Strona główna" Margin="10"/>
             <Button Content="Koszyk" Margin="10"/>
             <Button Content="Historia" Margin="10"/>
-            <Button Content="Konto" Margin="10"/>
+            <Button x:Name="LoginButton" Content="Zaloguj się" Margin="10" Click="LoginButton_Click"/>
         </StackPanel>
 
         <Grid Margin="10">
@@ -16,25 +16,33 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
+            <!-- Filtrowanie -->
             <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
-                <TextBox x:Name="SearchBox" Width="200" Margin="5" Text=""/>
+                <TextBox x:Name="SearchBox" Width="200" Margin="5" />
+
                 <ComboBox x:Name="CategoryFilterBox"
-                          Width="150" Margin="5"
-                          DisplayMemberPath="Name"
-                          SelectedValuePath="Id"/>
+              Width="150" Margin="5"
+              DisplayMemberPath="Name"
+              SelectedValuePath="Id" />
+
                 <Button Content="Szukaj" Margin="5" Click="Search_Click"/>
-                <Button Content="Dodaj produkt" Width="120" Margin="5" Click="AddProduct_Click"/>
-                <Button Content="Edytuj produkt" Width="120" Margin="5" Click="EditProduct_Click"/>
-                <Button Content="Usuń produkt" Width="120" Margin="5" Click="DeleteProduct_Click"/>
+
+                <Button x:Name="AddButton" Content="Dodaj produkt" Width="120" Margin="5" Click="AddProduct_Click"/>
+                <Button x:Name="EditButton" Content="Edytuj produkt" Width="120" Margin="5" Click="EditProduct_Click"/>
+                <Button x:Name="DeleteButton" Content="Usuń produkt" Width="120" Margin="5" Click="DeleteProduct_Click"/>
             </StackPanel>
 
+
+            <!-- Lista produktów -->
             <ListView x:Name="ProductList" Grid.Row="1" Margin="5" ItemsSource="{Binding Products}">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Width="200">
-                            <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="{Binding NameHeader}" Click="SortByName_Click"/>
-                            </GridViewColumn.Header>
+                        <GridViewColumn Header="{Binding NameHeader}" Width="200">
+                            <GridViewColumn.HeaderContainerStyle>
+                                <Style TargetType="GridViewColumnHeader">
+                                    <EventSetter Event="Click" Handler="SortByName_Click"/>
+                                </Style>
+                            </GridViewColumn.HeaderContainerStyle>
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="Name"/>
                             </GridViewColumn.DisplayMemberBinding>
@@ -42,10 +50,12 @@
 
                         <GridViewColumn Header="Opis" Width="300" DisplayMemberBinding="{Binding Description}"/>
 
-                        <GridViewColumn Width="100">
-                            <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="{Binding PriceHeader}" Click="SortByPrice_Click"/>
-                            </GridViewColumn.Header>
+                        <GridViewColumn Header="{Binding PriceHeader}" Width="100">
+                            <GridViewColumn.HeaderContainerStyle>
+                                <Style TargetType="GridViewColumnHeader">
+                                    <EventSetter Event="Click" Handler="SortByPrice_Click"/>
+                                </Style>
+                            </GridViewColumn.HeaderContainerStyle>
                             <GridViewColumn.DisplayMemberBinding>
                                 <Binding Path="Price"/>
                             </GridViewColumn.DisplayMemberBinding>
@@ -55,7 +65,7 @@
                     </GridView>
                 </ListView.View>
             </ListView>
-
         </Grid>
+
     </DockPanel>
 </Window>

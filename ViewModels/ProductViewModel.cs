@@ -11,6 +11,7 @@ namespace SklepInternetowyWPF.ViewModels
 
         public ObservableCollection<Product> Products { get; set; } = new ObservableCollection<Product>();
         public ObservableCollection<Category> Categories { get; set; } = new ObservableCollection<Category>();
+        public User CurrentUser { get; set; }
 
         private string _searchText = "";
         public string SearchText
