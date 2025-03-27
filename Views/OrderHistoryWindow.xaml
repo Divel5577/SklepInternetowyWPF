@@ -1,0 +1,40 @@
+﻿<Window x:Class="SklepInternetowyWPF.Views.OrderHistoryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:SklepInternetowyWPF.Converters"
+        Title="Historia zamówień" Height="450" Width="600">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="10">
+            <TextBlock Text="Twoje zamówienia:" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+
+            <ItemsControl ItemsSource="{Binding Orders}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="Gray" BorderThickness="1" Margin="0,0,0,10" Padding="10">
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold"
+                                           Text="{Binding Date, StringFormat='Zamówienie z dnia: {0:yyyy-MM-dd HH:mm}'}"/>
+                                <ItemsControl ItemsSource="{Binding Items}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Product.Name}" Width="200"/>
+                                                <TextBlock Text="{Binding Quantity}" Width="50"/>
+                                                <TextBlock Text="{Binding Total, StringFormat='{}{0:C}'}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock FontWeight="Bold" 
+                                           Text="{Binding Total, StringFormat='Łącznie: {0:C}'}"
+                                           Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Text="Brak zamówień." FontStyle="Italic" Visibility="{Binding Orders.Count, Converter={StaticResource ZeroToVisibilityConverter}}" />
+        </StackPanel>
+    </ScrollViewer>
+</Window>

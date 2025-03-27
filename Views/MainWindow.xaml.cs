@@ -8,17 +8,19 @@ namespace SklepInternetowyWPF.Views
     public partial class MainWindow : Window
     {
         private ProductViewModel viewModel;
+        private readonly CartViewModel cartViewModel;
 
         public MainWindow()
         {
             InitializeComponent();
             viewModel = new ProductViewModel();
+            cartViewModel = new CartViewModel(viewModel.CurrentUser?.Username ?? "Gość");
             DataContext = viewModel;
 
             CategoryFilterBox.ItemsSource = viewModel.Categories;
             CategoryFilterBox.SelectedIndex = 0;
 
-            UpdatePermissionUI(); // ukryj przyciski na starcie
+            UpdatePermissionUI();
         }
 
         private void AddProduct_Click(object sender, RoutedEventArgs e)
@@ -80,6 +82,31 @@ namespace SklepInternetowyWPF.Views
 
             viewModel.LoadProducts();
         }
+        private void Cart_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new CartWindow(cartViewModel);
+            window.ShowDialog();
+        }
+        private void AddToCart_Click(object sender, RoutedEventArgs e)
+        {
+            if (((FrameworkElement)sender).DataContext is Product product)
+            {
+                cartViewModel.AddToCart(product);
+            }
+        }
+        private void History_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(viewModel.CurrentUser?.Username))
+            {
+                var historyWindow = new OrderHistoryWindow(viewModel.CurrentUser.Username);
+                historyWindow.ShowDialog();
+            }
+            else
+            {
+                MessageBox.Show("Zaloguj się, aby zobaczyć historię zamówień.");
+            }
+        }
+
 
         private void SortByPrice_Click(object sender, RoutedEventArgs e)
         {
@@ -102,6 +129,7 @@ namespace SklepInternetowyWPF.Views
                 if (login.ShowDialog() == true)
                 {
                     viewModel.CurrentUser = login.LoggedUser;
+                    cartViewModel.CurrentUsername = viewModel.CurrentUser.Username;
                     LoginButton.Content = "Konto";
                     UpdatePermissionUI();
                 }
