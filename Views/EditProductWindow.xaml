@@ -1,36 +1,64 @@
 ﻿<Window x:Class="SklepInternetowyWPF.Views.EditProductWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Edytuj produkt" Height="350" Width="400">
-    <Grid Margin="20">
+        Title="Edytuj produkt" Height="380" Width="420">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Nazwa:" Grid.Row="0" />
-        <TextBox Text="{Binding Name}" Margin="0,5,0,10" Grid.Row="1"/>
+        <!-- Główna zawartość -->
+        <Grid Margin="20" Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-        <TextBlock Text="Opis:" Grid.Row="2" />
-        <TextBox Text="{Binding Description}" Margin="0,5,0,10" Grid.Row="3"/>
+            <TextBlock Text="Nazwa:" Grid.Row="0"/>
+            <TextBox Text="{Binding Name}" Margin="0,5,0,10" Grid.Row="1"/>
 
-        <StackPanel Grid.Row="4" Orientation="Vertical">
-            <TextBlock Text="Cena:" />
-            <TextBox Text="{Binding Price}" Margin="0,5,0,10"/>
+            <TextBlock Text="Opis:" Grid.Row="2"/>
+            <TextBox Text="{Binding Description}" Margin="0,5,0,10" Grid.Row="3"/>
 
-            <TextBlock Text="Kategoria:" />
-            <ComboBox x:Name="CategoryComboBox"
-                      DisplayMemberPath="Name"
-                      SelectedValuePath="Id"
-                      SelectedValue="{Binding CategoryId}"
-                      Margin="0,5,0,10"/>
-        </StackPanel>
+            <StackPanel Grid.Row="4" Orientation="Vertical">
+                <TextBlock Text="Cena:"/>
+                <TextBox Text="{Binding Price}" Margin="0,5,0,10"/>
 
-        <Button Content="Zapisz" Width="100" HorizontalAlignment="Right"
-                VerticalAlignment="Bottom" Margin="0,10,0,0"
-                Grid.Row="5" Click="Save_Click"/>
+                <TextBlock Text="Kategoria:"/>
+                <ComboBox x:Name="CategoryComboBox"
+                          DisplayMemberPath="Name"
+                          SelectedValuePath="Id"
+                          SelectedValue="{Binding CategoryId}"
+                          Margin="0,5,0,10"/>
+
+                <TextBlock Text="Stan magazynowy:"/>
+                <TextBox Text="{Binding Stock}" Margin="0,5,0,10"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Informacja o aktualnym stanie (Stock/StockMax) + Zapisz -->
+        <Grid Grid.Row="1" Margin="20,0,20,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Info o stanie -->
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" Grid.Column="0">
+                <TextBlock Text="Aktualny stan: " VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding Stock}" FontWeight="Bold" VerticalAlignment="Center"/>
+                <TextBlock Text=" / " VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding StockMax}" FontWeight="Bold" VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- Zapisz -->
+            <Button Content="Zapisz" Width="100" HorizontalAlignment="Right"
+                    Grid.Column="1" Click="Save_Click"/>
+        </Grid>
     </Grid>
 </Window>
