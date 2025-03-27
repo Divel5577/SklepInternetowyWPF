@@ -1,27 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿using System.Windows;
+using SklepInternetowyWPF.Models;
+using SklepInternetowyWPF.ViewModels;
 
 namespace SklepInternetowyWPF.Views
 {
-    /// <summary>
-    /// Logika interakcji dla klasy ProductDetailsWindow.xaml
-    /// </summary>
     public partial class ProductDetailsWindow : Window
     {
-        public ProductDetailsWindow()
+        private readonly Product product;
+        private readonly CartViewModel cart;
+
+        public ProductDetailsWindow(Product product, CartViewModel cart)
         {
             InitializeComponent();
+            this.product = product;
+            this.cart = cart;
+
+            NameText.Text = product.Name;
+            DescText.Text = product.Description;
+            PriceText.Text = $"{product.Price:C}";
+        }
+
+        private void AddToCart_Click(object sender, RoutedEventArgs e)
+        {
+            if (!int.TryParse(QuantityBox.Text, out int quantity) || quantity <= 0)
+            {
+                MessageBox.Show("Podaj prawidłową ilość.");
+                return;
+            }
+
+            for (int i = 0; i < quantity; i++)
+                cart.AddToCart(product);
+
+            MessageBox.Show($"Dodano {quantity} szt. do koszyka.");
+            Close();
+        }
+
+
+        private void Close_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
     }
 }

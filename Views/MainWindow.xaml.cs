@@ -82,6 +82,15 @@ namespace SklepInternetowyWPF.Views
 
             viewModel.LoadProducts();
         }
+        private void ProductList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (ProductList.SelectedItem is Product selected)
+            {
+                var detailsWindow = new ProductDetailsWindow(selected, cartViewModel);
+                detailsWindow.ShowDialog();
+            }
+        }
+
         private void Cart_Click(object sender, RoutedEventArgs e)
         {
             var window = new CartWindow(cartViewModel);

@@ -34,7 +34,11 @@
 
 
             <!-- Lista produktów -->
-            <ListView x:Name="ProductList" Grid.Row="1" Margin="5" ItemsSource="{Binding Products}">
+            <ListView x:Name="ProductList"
+          Grid.Row="1"
+          Margin="5"
+          ItemsSource="{Binding Products}"
+          MouseDoubleClick="ProductList_MouseDoubleClick">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="{Binding NameHeader}" Width="200">
@@ -49,7 +53,6 @@
                         </GridViewColumn>
 
                         <GridViewColumn Header="Opis" Width="300" DisplayMemberBinding="{Binding Description}"/>
-
                         <GridViewColumn Header="{Binding PriceHeader}" Width="100">
                             <GridViewColumn.HeaderContainerStyle>
                                 <Style TargetType="GridViewColumnHeader">
@@ -62,18 +65,10 @@
                         </GridViewColumn>
 
                         <GridViewColumn Header="Kategoria" Width="150" DisplayMemberBinding="{Binding CategoryName}"/>
-
-                        <GridViewColumn Header="Koszyk" Width="120">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Content="Dodaj do koszyka" Click="AddToCart_Click"/>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-
                     </GridView>
                 </ListView.View>
             </ListView>
+
         </Grid>
 
     </DockPanel>
