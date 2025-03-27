@@ -57,6 +57,8 @@
                     <Button x:Name="AddButton" Content="Dodaj produkt" Width="120" Margin="5" Click="AddProduct_Click"/>
                     <Button x:Name="EditButton" Content="Edytuj produkt" Width="120" Margin="5" Click="EditProduct_Click"/>
                     <Button x:Name="DeleteButton" Content="Usuń produkt" Width="120" Margin="5" Click="DeleteProduct_Click"/>
+                    <Button x:Name="StatsButton" Content="Statystyki" Width="120" Margin="5" Click="StatsButton_Click"/>
+
                 </StackPanel>
 
                 <!-- Prawa część (koszyk) -->

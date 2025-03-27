@@ -151,6 +151,11 @@ namespace SklepInternetowyWPF.Views
                 }
             }
         }
+        private void StatsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var statsWindow = new StatisticsWindow(viewModel);
+            statsWindow.ShowDialog();
+        }
 
 
         private void UpdatePermissionUI()
@@ -160,6 +165,7 @@ namespace SklepInternetowyWPF.Views
             AddButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
             EditButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
             DeleteButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
+            StatsButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 }
