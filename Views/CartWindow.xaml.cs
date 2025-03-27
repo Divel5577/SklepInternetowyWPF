@@ -7,11 +7,13 @@ namespace SklepInternetowyWPF.Views
     public partial class CartWindow : Window
     {
         private CartViewModel cartViewModel;
+        private readonly ProductViewModel productViewModel;
 
-        public CartWindow(CartViewModel cart)
+        public CartWindow(CartViewModel cart, ProductViewModel productViewModel)
         {
             InitializeComponent();
             cartViewModel = cart;
+            this.productViewModel = productViewModel;
             DataContext = cartViewModel;
         }
         private void PlaceOrder_Click(object sender, RoutedEventArgs e)
@@ -23,9 +25,11 @@ namespace SklepInternetowyWPF.Views
             }
 
             cartViewModel.PlaceOrder();
+            productViewModel.LoadProducts();
             MessageBox.Show("Zamówienie złożone!");
             Close();
         }
+
 
         private void Clear_Click(object sender, RoutedEventArgs e)
         {

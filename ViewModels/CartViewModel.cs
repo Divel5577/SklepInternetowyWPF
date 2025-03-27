@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.SQLite;
 using System.Linq;
+using System.Windows;
 
 namespace SklepInternetowyWPF.ViewModels
 {
@@ -47,9 +48,13 @@ namespace SklepInternetowyWPF.ViewModels
             new SQLiteCommand(createOrderItems, connection).ExecuteNonQuery();
             connection.Close();
         }
-
-        public void AddToCart(Product product)
+        public bool AddToCart(Product product)
         {
+            int totalInCart = CartItems.Where(x => x.Product.Id == product.Id).Sum(x => x.Quantity);
+
+            if (totalInCart >= product.Stock)
+                return false;
+
             var existing = CartItems.FirstOrDefault(c => c.Product.Id == product.Id);
             if (existing != null)
                 existing.Quantity++;
@@ -58,6 +63,7 @@ namespace SklepInternetowyWPF.ViewModels
 
             OnPropertyChanged(nameof(CartItems));
             OnPropertyChanged(nameof(Total));
+            return true;
         }
 
         public void ClearCart()
@@ -88,7 +94,14 @@ namespace SklepInternetowyWPF.ViewModels
                 insertItem.Parameters.AddWithValue("@ProductId", item.Product.Id);
                 insertItem.Parameters.AddWithValue("@Quantity", item.Quantity);
                 insertItem.ExecuteNonQuery();
+
+                // 🔄 Zmniejsz stock
+                var updateStock = new SQLiteCommand("UPDATE Products SET Stock = Stock - @Quantity WHERE Id = @ProductId;", connection);
+                updateStock.Parameters.AddWithValue("@Quantity", item.Quantity);
+                updateStock.Parameters.AddWithValue("@ProductId", item.Product.Id);
+                updateStock.ExecuteNonQuery();
             }
+
 
             connection.Close();
             ClearCart();

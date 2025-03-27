@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
 using SklepInternetowyWPF.Models;
 using SklepInternetowyWPF.ViewModels;
 using SklepInternetowyWPF.Views;
@@ -37,20 +38,12 @@ namespace SklepInternetowyWPF.Views
         {
             if (ProductList.SelectedItem is Product selected)
             {
-                var copy = new Product
-                {
-                    Id = selected.Id,
-                    Name = selected.Name,
-                    Description = selected.Description,
-                    Price = selected.Price,
-                    CategoryId = selected.CategoryId,
-                    CategoryName = selected.CategoryName
-                };
+                var fullProduct = viewModel.Products.FirstOrDefault(p => p.Id == selected.Id);
 
-                var window = new EditProductWindow(copy);
+                var window = new EditProductWindow(fullProduct);
                 if (window.ShowDialog() == true)
                 {
-                    viewModel.SaveProduct(copy);
+                    viewModel.SaveProduct(fullProduct);
                 }
             }
         }
@@ -93,8 +86,9 @@ namespace SklepInternetowyWPF.Views
 
         private void Cart_Click(object sender, RoutedEventArgs e)
         {
-            var window = new CartWindow(cartViewModel);
+            var window = new CartWindow(cartViewModel, viewModel);
             window.ShowDialog();
+            viewModel.LoadProducts();
         }
         private void AddToCart_Click(object sender, RoutedEventArgs e)
         {
