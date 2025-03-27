@@ -247,6 +247,40 @@ namespace SklepInternetowyWPF.ViewModels
                 }
             }
         }
+        public ObservableCollection<ProductStatistics> GetTopSellingProducts(int top = 10)
+        {
+            var results = new ObservableCollection<ProductStatistics>();
+
+            using (var connection = new SQLiteConnection(_connectionString))
+            {
+                connection.Open();
+                string sql = @"
+            SELECT p.Name, SUM(oi.Quantity) as TotalSold
+            FROM OrderItems oi
+            JOIN Products p ON p.Id = oi.ProductId
+            GROUP BY oi.ProductId
+            ORDER BY TotalSold DESC
+            LIMIT @Top";
+
+                using (var cmd = new SQLiteCommand(sql, connection))
+                {
+                    cmd.Parameters.AddWithValue("@Top", top);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            results.Add(new ProductStatistics
+                            {
+                                ProductName = reader.GetString(0),
+                                TotalQuantitySold = reader.GetInt32(1)
+                            });
+                        }
+                    }
+                }
+            }
+
+            return results;
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
