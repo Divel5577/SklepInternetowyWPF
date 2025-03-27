@@ -1,44 +1,84 @@
 ﻿<Window x:Class="SklepInternetowyWPF.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Sklep Internetowy" Height="600" Width="920">
+        Title="Sklep Internetowy" Height="600" Width="1100">
     <DockPanel>
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Background="LightGray" Height="50">
-            <Button Content="Strona główna" Margin="10"/>
-            <Button Content="Koszyk" Margin="10" Click="Cart_Click" />
-            <Button Content="Historia" Margin="10" Click="History_Click"/>
-            <Button x:Name="LoginButton" Content="Zaloguj się" Margin="10" Click="LoginButton_Click"/>
-        </StackPanel>
 
+        <!-- Pasek nagłówka -->
+        <Grid DockPanel.Dock="Top" Background="LightGray" Height="50">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Sklep Internetowy"
+                       VerticalAlignment="Center"
+                       Margin="10,0"
+                       FontWeight="Bold"
+                       FontSize="16"/>
+
+            <Button x:Name="LoginButton"
+                    Content="Zaloguj się"
+                    Margin="10"
+                    Click="LoginButton_Click"
+                    Grid.Column="1"/>
+        </Grid>
+
+        <!-- Główna zawartość -->
         <Grid Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Filtrowanie -->
-            <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,10">
-                <TextBox x:Name="SearchBox" Width="200" Margin="5" />
+            <!-- Pasek filtrów + przyciski -->
+            <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,10">
 
-                <ComboBox x:Name="CategoryFilterBox"
-              Width="150" Margin="5"
-              DisplayMemberPath="Name"
-              SelectedValuePath="Id" />
+                <!-- Lewa część (wyszukiwarka, filtr, szukaj) -->
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                    <TextBox x:Name="SearchBox" Width="200" Margin="5"/>
+                    <ComboBox x:Name="CategoryFilterBox"
+                              Width="150" Margin="5"
+                              SelectedValuePath="Id"
+                              HorizontalContentAlignment="Center">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}"
+                                           TextAlignment="Center"
+                                           HorizontalAlignment="Center"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Content="Szukaj" Margin="5" Click="Search_Click"/>
+                </StackPanel>
 
-                <Button Content="Szukaj" Margin="5" Click="Search_Click"/>
+                <!-- Środek (admin) -->
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Margin="20,0,0,0">
+                    <Button x:Name="AddButton" Content="Dodaj produkt" Width="120" Margin="5" Click="AddProduct_Click"/>
+                    <Button x:Name="EditButton" Content="Edytuj produkt" Width="120" Margin="5" Click="EditProduct_Click"/>
+                    <Button x:Name="DeleteButton" Content="Usuń produkt" Width="120" Margin="5" Click="DeleteProduct_Click"/>
+                </StackPanel>
 
-                <Button x:Name="AddButton" Content="Dodaj produkt" Width="120" Margin="5" Click="AddProduct_Click"/>
-                <Button x:Name="EditButton" Content="Edytuj produkt" Width="120" Margin="5" Click="EditProduct_Click"/>
-                <Button x:Name="DeleteButton" Content="Usuń produkt" Width="120" Margin="5" Click="DeleteProduct_Click"/>
-            </StackPanel>
-
+                <!-- Prawa część (koszyk) -->
+                <Button Content="🛒"
+                        Width="40"
+                        Height="40"
+                        Click="Cart_Click"
+                        ToolTip="Koszyk"
+                        FontSize="18"
+                        Background="BlueViolet"
+                        Foreground="White"
+                        Margin="10,0,0,0"
+                        DockPanel.Dock="Right"
+                        Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"/>
+            </DockPanel>
 
             <!-- Lista produktów -->
             <ListView x:Name="ProductList"
-          Grid.Row="1"
-          Margin="5"
-          ItemsSource="{Binding Products}"
-          MouseDoubleClick="ProductList_MouseDoubleClick">
+                      Grid.Row="1"
+                      Margin="5"
+                      ItemsSource="{Binding Products}"
+                      MouseDoubleClick="ProductList_MouseDoubleClick">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="{Binding NameHeader}" Width="200">
@@ -70,6 +110,5 @@
             </ListView>
 
         </Grid>
-
     </DockPanel>
 </Window>
