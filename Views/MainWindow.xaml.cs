@@ -138,16 +138,26 @@ namespace SklepInternetowyWPF.Views
                 if (login.ShowDialog() == true)
                 {
                     viewModel.CurrentUser = login.LoggedUser;
-                    cartViewModel.CurrentUsername = viewModel.CurrentUser.Username;
+                    cartViewModel.CurrentUsername = login.LoggedUser.Username;
                     LoginButton.Content = "Konto";
                     UpdatePermissionUI();
                 }
             }
             else
             {
-                MessageBox.Show($"Zalogowany jako: {viewModel.CurrentUser.Username}");
+                var account = new AccountWindow(viewModel.CurrentUser.Username);
+                account.ShowDialog();
+
+                if (account.LoggedOut)
+                {
+                    viewModel.CurrentUser = null;
+                    cartViewModel.CurrentUsername = "Gość";
+                    LoginButton.Content = "Zaloguj się";
+                    UpdatePermissionUI();
+                }
             }
         }
+
 
         private void UpdatePermissionUI()
         {
