@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using SklepInternetowyWPF.ViewModels;
 
@@ -18,6 +19,13 @@ namespace SklepInternetowyWPF.Views
             var storyboard = (Storyboard)this.Resources["FadeInStoryboard"];
             storyboard.Begin(this);
         }
-
+        private void Print_Click(object sender, RoutedEventArgs e)
+        {
+            PrintDialog printDialog = new PrintDialog();
+            if (printDialog.ShowDialog() == true)
+            {
+                printDialog.PrintVisual(OrderContent, "Historia zamówień");
+            }
+        }
     }
 }

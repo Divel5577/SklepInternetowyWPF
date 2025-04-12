@@ -15,6 +15,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Text="Najczęściej kupowane produkty"
@@ -40,5 +41,12 @@
                 </GridView>
             </ListView.View>
         </ListView>
+
+        <Button Content="Drukuj"
+                Grid.Row="2"
+                Width="80" Height="30" Margin="0,10,0,0"
+                HorizontalAlignment="Right"
+                Click="Print_Click"
+                Background="#90C4E4" Foreground="#1B1C2E"/>
     </Grid>
 </Window>

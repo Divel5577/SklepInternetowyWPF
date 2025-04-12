@@ -47,7 +47,7 @@ namespace SklepInternetowyWPF.Views
                         existing.CategoryId = Product.CategoryId;
                         existing.Stock = Product.Stock;
                         existing.StockMax = Product.StockMax;
-                        existing.ImagePath = Product.ImagePath; // <- kluczowe
+                        existing.ImagePath = Product.ImagePath;
                         db.SaveChanges();
                     }
                 }
