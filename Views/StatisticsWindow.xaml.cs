@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Media.Animation;
 using SklepInternetowyWPF.ViewModels;
 
 namespace SklepInternetowyWPF.Views
@@ -10,5 +11,11 @@ namespace SklepInternetowyWPF.Views
             InitializeComponent();
             StatsListView.ItemsSource = viewModel.GetTopSellingProducts();
         }
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            var storyboard = (Storyboard)this.Resources["FadeInStoryboard"];
+            storyboard.Begin(this);
+        }
+
     }
 }

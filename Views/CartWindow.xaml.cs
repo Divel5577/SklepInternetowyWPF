@@ -1,6 +1,7 @@
 ﻿using SklepInternetowyWPF.ViewModels;
 using System.Windows;
 using System.Linq;
+using System.Windows.Media.Animation;
 
 namespace SklepInternetowyWPF.Views
 {
@@ -30,7 +31,6 @@ namespace SklepInternetowyWPF.Views
             Close();
         }
 
-
         private void Clear_Click(object sender, RoutedEventArgs e)
         {
             cartViewModel.ClearCart();
@@ -40,5 +40,11 @@ namespace SklepInternetowyWPF.Views
         {
             Close();
         }
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            var storyboard = (Storyboard)this.Resources["FadeInStoryboard"];
+            storyboard.Begin(this);
+        }
+
     }
 }
