@@ -1,16 +1,14 @@
 ﻿using Microsoft.Win32;
+using SklepInternetowyWPF.Data;
+using SklepInternetowyWPF.ViewModels;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using SklepInternetowyWPF.Models;
-using SklepInternetowyWPF.ViewModels;
 using System.Windows.Input;
-using System;
-using SklepInternetowyWPF.Data;
+using System.Windows.Media.Animation;
 
 namespace SklepInternetowyWPF.Views
 {
@@ -91,24 +89,28 @@ namespace SklepInternetowyWPF.Views
 
             if (dlg.ShowDialog() == true)
             {
-                string projectDir = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.FullName;
-                string imagesFolder = Path.Combine(projectDir, "Images");
-                Directory.CreateDirectory(imagesFolder);
+                try
+                {
+                    string projectDir = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.FullName;
+                    string imagesFolder = Path.Combine(projectDir, "Images");
+                    Directory.CreateDirectory(imagesFolder);
 
-                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(dlg.FileName);
-                string destPath = Path.Combine(imagesFolder, fileName);
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(dlg.FileName);
+                    string destPath = Path.Combine(imagesFolder, fileName);
 
-                File.Copy(dlg.FileName, destPath, true);
+                    File.Copy(dlg.FileName, destPath, true);
 
-                Product.ImagePath = $"Images/{fileName}".Replace("\\", "/");
+                    Product.ImagePath = $"Images/{fileName}".Replace("\\", "/");
 
-                string runtimeImagesFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images");
-                Directory.CreateDirectory(runtimeImagesFolder);
-                File.Copy(destPath, Path.Combine(runtimeImagesFolder, fileName), true);
+                    string runtimeImagesFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images");
+                    Directory.CreateDirectory(runtimeImagesFolder);
+                    File.Copy(destPath, Path.Combine(runtimeImagesFolder, fileName), true);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Wystąpił błąd podczas zapisywania obrazu: {ex.Message}", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
-
-
-
     }
 }
