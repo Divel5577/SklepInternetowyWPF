@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Linq;
 using System.Windows.Media.Animation;
+using SklepInternetowyWPF.Utils;
 
 namespace SklepInternetowyWPF.Views
 {
@@ -39,6 +40,10 @@ namespace SklepInternetowyWPF.Views
         private void Close_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+        private void ExportToPdf_Click(object sender, RoutedEventArgs e)
+        {
+            PdfExporter.ExportCartToPdf(cartViewModel);
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
