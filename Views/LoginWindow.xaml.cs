@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Media.Animation;
 using SklepInternetowyWPF.Models;
 using SklepInternetowyWPF.ViewModels;
 
@@ -37,5 +38,11 @@ namespace SklepInternetowyWPF.Views
                 ErrorText.Text = "Nieprawidłowe dane logowania.";
             }
         }
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            var storyboard = (Storyboard)this.Resources["FadeInStoryboard"];
+            storyboard.Begin(this);
+        }
+
     }
 }

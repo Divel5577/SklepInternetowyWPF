@@ -1,5 +1,7 @@
 ﻿using System.Linq;
 using System.Windows;
+using System.Windows.Media.Animation;
+using SklepInternetowyWPF.Data;
 using SklepInternetowyWPF.Models;
 using SklepInternetowyWPF.ViewModels;
 using SklepInternetowyWPF.Views;
@@ -38,15 +40,43 @@ namespace SklepInternetowyWPF.Views
         {
             if (ProductList.SelectedItem is Product selected)
             {
-                var fullProduct = viewModel.Products.FirstOrDefault(p => p.Id == selected.Id);
-
-                var window = new EditProductWindow(fullProduct);
-                if (window.ShowDialog() == true)
+                using (var db = new AppDbContext())
                 {
-                    viewModel.SaveProduct(fullProduct);
+                    var productFromDb = db.Products.FirstOrDefault(p => p.Id == selected.Id);
+                    if (productFromDb == null)
+                        return;
+
+                    var tempProduct = new Product
+                    {
+                        Id = productFromDb.Id,
+                        Name = productFromDb.Name,
+                        Description = productFromDb.Description,
+                        Price = productFromDb.Price,
+                        CategoryId = productFromDb.CategoryId,
+                        Stock = productFromDb.Stock,
+                        StockMax = productFromDb.StockMax,
+                        ImagePath = productFromDb.ImagePath
+                    };
+
+                    var window = new EditProductWindow(tempProduct);
+                    if (window.ShowDialog() == true)
+                    {
+                        productFromDb.Name = tempProduct.Name;
+                        productFromDb.Description = tempProduct.Description;
+                        productFromDb.Price = tempProduct.Price;
+                        productFromDb.CategoryId = tempProduct.CategoryId;
+                        productFromDb.Stock = tempProduct.Stock;
+                        productFromDb.StockMax = tempProduct.StockMax;
+                        productFromDb.ImagePath = tempProduct.ImagePath;
+
+                        db.SaveChanges();
+
+                        viewModel.LoadProducts(); 
+                    }
                 }
             }
         }
+
 
         private void DeleteProduct_Click(object sender, RoutedEventArgs e)
         {
@@ -58,10 +88,18 @@ namespace SklepInternetowyWPF.Views
 
         private void Search_Click(object sender, RoutedEventArgs e)
         {
-            viewModel.SearchText = SearchBox.Text.Trim();
+            string query = SearchBox.Text.Trim();
+            if (string.IsNullOrEmpty(query))
+            {
+                MessageBox.Show("Wprowadź nazwę produktu do wyszukania.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            viewModel.SearchText = query;
             viewModel.SelectedCategoryId = (int)(CategoryFilterBox.SelectedValue ?? 0);
             viewModel.LoadProducts();
         }
+
 
         private void SortByName_Click(object sender, RoutedEventArgs e)
         {
@@ -156,7 +194,11 @@ namespace SklepInternetowyWPF.Views
             var statsWindow = new StatisticsWindow(viewModel);
             statsWindow.ShowDialog();
         }
-
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            var storyboard = (Storyboard)this.Resources["FadeInStoryboard"];
+            storyboard.Begin(this);
+        }
 
         private void UpdatePermissionUI()
         {
@@ -166,6 +208,11 @@ namespace SklepInternetowyWPF.Views
             EditButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
             DeleteButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
             StatsButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void ProductList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+
         }
     }
 }

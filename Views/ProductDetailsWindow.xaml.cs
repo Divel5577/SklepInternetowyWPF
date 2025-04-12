@@ -1,5 +1,9 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
+using System.IO;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 using SklepInternetowyWPF.Models;
 using SklepInternetowyWPF.ViewModels;
 
@@ -19,6 +23,15 @@ namespace SklepInternetowyWPF.Views
             NameText.Text = product.Name;
             DescText.Text = product.Description;
             PriceText.Text = $"{product.Price:C}";
+
+            if (!string.IsNullOrWhiteSpace(product.ImagePath) && File.Exists(product.ImagePath))
+            {
+                string fullPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, product.ImagePath);
+                if (File.Exists(fullPath))
+                {
+                    ProductImage.Source = new BitmapImage(new Uri(fullPath));
+                }
+            }
 
             SetupStockVisuals();
         }
@@ -87,7 +100,11 @@ namespace SklepInternetowyWPF.Views
             Close();
         }
 
-
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            var storyboard = (Storyboard)this.Resources["FadeInStoryboard"];
+            storyboard.Begin(this);
+        }
 
         private void Close_Click(object sender, RoutedEventArgs e)
         {

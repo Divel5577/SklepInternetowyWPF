@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.SQLite;
 using SklepInternetowyWPF.Models;
@@ -92,6 +93,7 @@ namespace SklepInternetowyWPF.ViewModels
                         Stock INTEGER NOT NULL,
                         StockMax INTEGER NOT NULL,
                         CategoryId INTEGER,
+                        ImagePath TEXT,
                         FOREIGN KEY (CategoryId) REFERENCES Categories(Id)
                     );";
 
@@ -145,7 +147,7 @@ namespace SklepInternetowyWPF.ViewModels
                 string orderDirection = SortDescending ? "DESC" : "ASC";
 
                 string sql = $@"
-                    SELECT p.Id, p.Name, p.Description, p.Price, p.Stock, p.StockMax, c.Id, c.Name
+                    SELECT p.Id, p.Name, p.Description, p.Price, p.Stock, p.StockMax, c.Id, c.Name, p.ImagePath
                     FROM Products p
                     LEFT JOIN Categories c ON p.CategoryId = c.Id
                     WHERE (@Search = '' OR p.Name LIKE @Search)
@@ -173,7 +175,8 @@ namespace SklepInternetowyWPF.ViewModels
                                 Stock = reader.GetInt32(4),
                                 StockMax = reader.GetInt32(5),
                                 CategoryId = reader.IsDBNull(6) ? 0 : reader.GetInt32(6),
-                                CategoryName = reader.IsDBNull(7) ? "" : reader.GetString(7)
+                                CategoryName = reader.IsDBNull(7) ? "" : reader.GetString(7),
+                                ImagePath = reader.IsDBNull(8) ? null : reader.GetString(8)
                             });
                         }
                     }
@@ -190,8 +193,9 @@ namespace SklepInternetowyWPF.ViewModels
             {
                 connection.Open();
                 string sql = product.Id == 0
-                    ? "INSERT INTO Products (Name, Description, Price, CategoryId, Stock, StockMax) VALUES (@Name, @Description, @Price, @CategoryId, @Stock, @StockMax)"
-                    : "UPDATE Products SET Name = @Name, Description = @Description, Price = @Price, CategoryId = @CategoryId, Stock = @Stock, StockMax = @StockMax WHERE Id = @Id";
+                    ? "INSERT INTO Products (Name, Description, Price, CategoryId, Stock, StockMax, ImagePath) VALUES (@Name, @Description, @Price, @CategoryId, @Stock, @StockMax, @ImagePath)"
+                    : "UPDATE Products SET Name = @Name, Description = @Description, Price = @Price, CategoryId = @CategoryId, Stock = @Stock, StockMax = @StockMax, ImagePath = @ImagePath WHERE Id = @Id";
+
 
                 using (var cmd = new SQLiteCommand(sql, connection))
                 {
@@ -204,6 +208,7 @@ namespace SklepInternetowyWPF.ViewModels
                     cmd.Parameters.AddWithValue("@CategoryId", product.CategoryId);
                     cmd.Parameters.AddWithValue("@Stock", product.Stock);
                     cmd.Parameters.AddWithValue("@StockMax", product.StockMax);
+                    cmd.Parameters.AddWithValue("@ImagePath", product.ImagePath ?? (object)DBNull.Value);
 
                     cmd.ExecuteNonQuery();
 
