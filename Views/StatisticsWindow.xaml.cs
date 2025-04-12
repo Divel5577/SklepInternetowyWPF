@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
+using SklepInternetowyWPF.Utils;
 using SklepInternetowyWPF.ViewModels;
 
 namespace SklepInternetowyWPF.Views
@@ -10,6 +11,7 @@ namespace SklepInternetowyWPF.Views
         public StatisticsWindow(ProductViewModel viewModel)
         {
             InitializeComponent();
+            DataContext = viewModel;
             StatsListView.ItemsSource = viewModel.GetTopSellingProducts();
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -25,5 +27,11 @@ namespace SklepInternetowyWPF.Views
                 dialog.PrintVisual(StatsListView, "Statystyki sprzedaży");
             }
         }
+        private void ExportToPdf_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ProductViewModel vm)
+                PdfExporter.ExportStatistics(vm);
+        }
+
     }
 }

@@ -43,7 +43,13 @@
                         Click="PlaceOrder_Click"
                         Background="#90C4E4"
                         Foreground="#1B1C2E"/>
-
+                <Button Content="Eksportuj do PDF"
+                        Width="120"
+                        Height="30"
+                        Margin="5"
+                        Click="ExportToPdf_Click"
+                        Background="#9AD4D6"
+                        Foreground="#1B1C2E"/>
                 <Button Content="Wyczyść"
                         Width="80"
                         Height="30"

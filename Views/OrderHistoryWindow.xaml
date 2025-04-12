@@ -63,15 +63,22 @@
             </StackPanel>
         </ScrollViewer>
 
-        <Button Content="Drukuj"
-                Grid.Row="1"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Bottom"
-                Margin="0,10,0,0"
-                Width="90"
-                Height="30"
-                Click="Print_Click"
-                Background="#90C4E4"
-                Foreground="#1B1C2E"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="Eksportuj do PDF"
+            Width="120"
+            Height="30"
+            Margin="0,0,10,0"
+            Click="ExportToPdf_Click"
+            Background="#9AD4D6"
+            Foreground="#1B1C2E"/>
+
+            <Button Content="Drukuj"
+            Width="90"
+            Height="30"
+            Click="Print_Click"
+            Background="#90C4E4"
+            Foreground="#1B1C2E"/>
+        </StackPanel>
+
     </Grid>
 </Window>
