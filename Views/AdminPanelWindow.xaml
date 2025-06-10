@@ -1,7 +1,7 @@
 ﻿<Window x:Class="SklepInternetowyWPF.Views.AdminPanelWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Panel administratora" Height="300" Width="400"
+        Title="Panel administratora" Height="320" Width="400"
         Background="#EDF4FF">
     <StackPanel Margin="20">
         <TextBlock Text="Panel administratora"

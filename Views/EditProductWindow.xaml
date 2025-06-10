@@ -4,6 +4,7 @@
         xmlns:validators="clr-namespace:SklepInternetowyWPF.Validators"
         xmlns:converters="clr-namespace:SklepInternetowyWPF.Converters"
         Title="Edytuj produkt" Height="550" Width="460"
+        Language="pl-PL"
         Loaded="Window_Loaded"
         Background="#EDF4FF">
 
@@ -65,11 +66,19 @@
             </TextBox>
 
             <TextBlock Text="Cena:" Foreground="#1B1C2E" Margin="0,10,0,0"/>
-            <TextBox Margin="0,5,0,0">
+            <TextBox x:Name="PriceBox"
+                     VerticalContentAlignment="Center"
+                     PreviewTextInput="PriceBox_PreviewTextInput"
+                     TextChanged="PriceBox_TextChanged"
+                     DataObject.Pasting="PriceBox_Pasting">
                 <TextBox.Text>
-                    <Binding Path="Price" UpdateSourceTrigger="PropertyChanged">
+                    <Binding Path="Price"
+                             Mode="TwoWay"
+                             UpdateSourceTrigger="LostFocus"
+                             ValidatesOnExceptions="True"
+                             ConverterCulture="pl-PL">
                         <Binding.ValidationRules>
-                            <validators:PositiveDecimalValidationRule />
+                            <validators:PositiveDecimalValidationRule/>
                         </Binding.ValidationRules>
                     </Binding>
                 </TextBox.Text>
