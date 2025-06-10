@@ -112,5 +112,35 @@ namespace SklepInternetowyWPF.Views
                 }
             }
         }
+        private void PriceBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var tb = (TextBox)sender;
+            int pos = tb.SelectionStart;
+            string normalized = tb.Text.Replace('.', ',');
+            if (normalized != tb.Text)
+            {
+                tb.Text = normalized;
+                tb.SelectionStart = pos;
+            }
+        }
+        private void PriceBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            char c = e.Text.FirstOrDefault();
+            if (!char.IsDigit(c) && c != ',' && c != '.')
+                e.Handled = true;
+        }
+        private void PriceBox_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                var text = (string)e.DataObject.GetData(typeof(string));
+                if (!Regex.IsMatch(text, @"^[0-9\.,]+$"))
+                    e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
     }
 }

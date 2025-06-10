@@ -8,12 +8,12 @@ namespace SklepInternetowyWPF.Views
 {
     public partial class OrderHistoryWindow : Window
     {
+        private readonly OrderHistoryViewModel historyViewModel;
         public OrderHistoryWindow(string username)
         {
             InitializeComponent();
-            var vm = new OrderViewModel();
-            vm.LoadOrders(username);
-            DataContext = vm;
+            historyViewModel = new OrderHistoryViewModel(username);
+            DataContext = historyViewModel;
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -30,8 +30,7 @@ namespace SklepInternetowyWPF.Views
         }
         private void ExportToPdf_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is OrderViewModel vm)
-                PdfExporter.ExportOrderHistory(vm);
+            PdfExporter.ExportOrderHistory(historyViewModel);
         }
     }
 }

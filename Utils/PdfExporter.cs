@@ -3,9 +3,11 @@ using PdfSharp.Pdf;
 using SklepInternetowyWPF.Models;
 using SklepInternetowyWPF.ViewModels;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace SklepInternetowyWPF.Utils
@@ -15,58 +17,230 @@ namespace SklepInternetowyWPF.Utils
         public static void ExportCartToPdf(CartViewModel cart)
         {
             var doc = new PdfDocument();
-            doc.Info.Title = "Koszyk";
+            doc.Info.Title = $"Koszyk_{cart.CurrentUsername}_{DateTime.Now:yyyyMMdd_HHmmss}";
 
+            const double outerMargin = 20;    // zewnętrzny margines od strony  
+            const double innerPadding = 20;   // dodatkowy padding wewnątrz ramki  
+            const double rowHeight = 25;
+
+            var headerFont = new XFont("Verdana", 14, XFontStyle.Bold);
+            var normalFont = new XFont("Verdana", 11);
+            var footerFont = new XFont("Verdana", 9, XFontStyle.Italic);
+            var sectionFont = new XFont("Verdana", 12, XFontStyle.Bold);
+
+            // jedna strona  
             var page = doc.AddPage();
             var gfx = XGraphics.FromPdfPage(page);
-            var font = new XFont("Verdana", 12);
-            double y = 40;
-            gfx.DrawString("Koszyk", new XFont("Verdana", 16, XFontStyle.Bold), XBrushes.Black, 20, y);
+
+            // pole rysowania ramki  
+            double frameX = outerMargin;
+            double frameY = outerMargin;
+            double frameWidth = page.Width - 2 * outerMargin;
+            double frameHeight = page.Height - 2 * outerMargin;
+            gfx.DrawRectangle(XPens.Black, frameX, frameY, frameWidth, frameHeight);
+
+            // obszar treści wewnątrz ramki  
+            double contentX = frameX + innerPadding;
+            double contentY = frameY + innerPadding;
+            double contentWidth = frameWidth - 2 * innerPadding;
+
+            // nagłówek  
+            double y = contentY;
+            gfx.DrawString($"Koszyk użytkownika: {cart.CurrentUsername}",
+                           headerFont, XBrushes.Black,
+                           new XPoint(contentX, y));
+            // data odsunięta od prawej krawędzi ramki minus padding  
+            gfx.DrawString($"Data: {DateTime.Now:yyyy-MM-dd HH:mm}",
+                           normalFont, XBrushes.DarkGray,
+                           new XRect(contentX, y, contentWidth, normalFont.Height),
+                           XStringFormats.TopRight);
+
             y += 30;
 
-            foreach (var item in cart.CartItems)
+            // rysujemy tabelę zaczynając od contentX  
+            y = DrawTable(
+                gfx,
+                contentX, y,
+                contentWidth, rowHeight,
+                new[] { "Produkt", "Ilość", "Cena jedn.", "Wartość" },
+                cart.CartItems.Select(i => (i.Product.Name, i.Quantity, i.Product.Price, i.Total))
+            );
+
+            // jeśli tabela jest pusta, wyświetlamy komunikat
+            if (!cart.CartItems.Any())
             {
-                string line = $"{item.Product.Name} x {item.Quantity} - {item.Total:C}";
-                gfx.DrawString(line, font, XBrushes.Black, 20, y);
-                y += 20;
+                gfx.DrawString("Koszyk jest pusty", normalFont, XBrushes.Gray,
+                               new XPoint(contentX + contentWidth / 2, y + rowHeight / 2),
+                               XStringFormats.Center);
+                y += rowHeight;
             }
+            else
+            {
+                y += rowHeight * (cart.CartItems.Count) * 0.45;
+            }
+            // podsumowanie  
+            gfx.DrawString("Razem:", sectionFont, XBrushes.Black,
+                          new XPoint(contentX + contentWidth * 0.73, y));
+            gfx.DrawString($"{cart.Total:C}", sectionFont, XBrushes.Black,
+                          new XPoint(contentX + contentWidth * 0.88, y));
+            y += 30;
 
-            y += 10;
-            gfx.DrawString($"Łącznie: {cart.Total:C}", font, XBrushes.Black, 20, y);
+            // stopka (strona 1)  
+            gfx.DrawString("Strona 1", footerFont, XBrushes.Gray,
+                           new XRect(0, page.Height - outerMargin / 2, page.Width, outerMargin / 2),
+                           XStringFormats.Center);
 
-            SavePdf(doc, "Koszyk");
+            SavePdf(doc, $"Koszyk_{cart.CurrentUsername}");
         }
 
-        public static void ExportOrderHistory(OrderViewModel orderVM)
+        public static void ExportOrderHistory(OrderHistoryViewModel history)
         {
             var doc = new PdfDocument();
-            doc.Info.Title = "Historia zamówień";
+            doc.Info.Title = $"HistoriaZamowien_{DateTime.Now:yyyyMMdd_HHmmss}";
 
-            var page = doc.AddPage();
+            const double margin = 20;
+            const double rowHeight = 20;
+            var headerFont = new XFont("Verdana", 14, XFontStyle.Bold);
+            var normalFont = new XFont("Verdana", 11);
+            var sectionFont = new XFont("Verdana", 12, XFontStyle.Bold);
+            var footerFont = new XFont("Verdana", 9, XFontStyle.Italic);
+
+            int pageIndex = 1;
+            PdfPage page = doc.AddPage();
             var gfx = XGraphics.FromPdfPage(page);
-            var font = new XFont("Verdana", 12);
-            double y = 40;
-            gfx.DrawString("Historia zamówień", new XFont("Verdana", 16, XFontStyle.Bold), XBrushes.Black, 20, y);
+            double contentWidth = page.Width - 2 * margin;
+            double y = margin + 10;
+
+            // nagłówek pierwszej strony
+            string username = history.Orders.FirstOrDefault()?.Username ?? "Gość";
+            gfx.DrawString($"Historia zamówień użytkownika: {username}", headerFont, XBrushes.Black, new XPoint(margin, y));
+            gfx.DrawString($"Wygenerowano: {DateTime.Now:yyyy-MM-dd HH:mm}", normalFont, XBrushes.DarkGray,
+                          new XRect(margin, y, contentWidth, normalFont.Height), XStringFormats.TopRight);
             y += 30;
 
-            foreach (var order in orderVM.Orders)
+            foreach (var order in history.Orders)
             {
-                gfx.DrawString($"Zamówienie: {order.Date:yyyy-MM-dd HH:mm}", font, XBrushes.Black, 20, y);
+                // sekcja zamówienia
+                gfx.DrawString($"Zamówienie #{order.Id} — {order.Date:yyyy-MM-dd HH:mm}", sectionFont, XBrushes.Black, margin, y);
                 y += 20;
 
-                foreach (var item in order.Items)
-                {
-                    gfx.DrawString($"- {item.Product.Name} x {item.Quantity} = {item.Total:C}", font, XBrushes.Black, 30, y);
-                    y += 20;
-                }
+                // tabela pozycji
+                DrawTable(
+                    gfx,
+                    margin, y,
+                    contentWidth, rowHeight,
+                    new[] { "Produkt", "Ilość", "Cena jedn.", "Wartość" },
+                    order.Items.Select(i => (i.Product.Name, i.Quantity, i.Product.Price, i.Total))
+                );
 
-                gfx.DrawString($"Łącznie: {order.Total:C}", font, XBrushes.Black, 20, y);
+                // przesunięcie y
+                y += rowHeight * (order.Items.Count() + 2);
+
+                // podsumowanie
+                gfx.DrawString("Razem:", sectionFont, XBrushes.Black,
+                              new XPoint(margin + contentWidth * 0.75, y));
+                gfx.DrawString($"{order.Total:C}", sectionFont, XBrushes.Black,
+                              new XPoint(margin + contentWidth * 0.89, y));
                 y += 30;
+
+                // jeśli zabrakło miejsca, nowa strona
+                if (y > page.Height - margin - 60)
+                {
+                    // footer dla bieżącej strony
+                    gfx.DrawString($"Strona {pageIndex}", footerFont, XBrushes.Gray,
+                                  new XRect(0, page.Height - margin / 2, page.Width, margin / 2),
+                                  XStringFormats.Center);
+
+                    // nowa strona
+                    pageIndex++;
+                    page = doc.AddPage();
+                    gfx = XGraphics.FromPdfPage(page);
+                    contentWidth = page.Width - 2 * margin;
+                    y = margin + 10;
+
+                    // nagłówek kolejnej strony
+                    gfx.DrawString($"Historia zamówień użytkownika: {username}", headerFont, XBrushes.Black, new XPoint(margin, y));
+                    gfx.DrawString($"Wygenerowano: {DateTime.Now:yyyy-MM-dd HH:mm}", normalFont, XBrushes.DarkGray,
+                                  new XRect(margin, y, contentWidth, normalFont.Height), XStringFormats.TopRight);
+                    y += 30;
+                }
             }
+
+            // footer ostatniej strony
+            gfx.DrawString($"Strona {pageIndex}", footerFont, XBrushes.Gray,
+                          new XRect(0, page.Height - margin / 2, page.Width, margin / 2),
+                          XStringFormats.Center);
 
             SavePdf(doc, "HistoriaZamowien");
         }
 
+        private static double DrawTable(
+            XGraphics gfx,
+            double startX,
+            double startY,
+            double totalWidth,
+            double rowHeight,
+            string[] headers,
+            System.Collections.Generic.IEnumerable<(string Name, int Qty, decimal Price, decimal LineTotal)> rows)
+        {
+            int cols = headers.Length;
+            // procentowe szerokości kolumn: 50%, 15%, 17.5%, 17.5%
+            double[] colWidths = { totalWidth * 0.5, totalWidth * 0.15, totalWidth * 0.175, totalWidth * 0.175 };
+            double[] colX = new double[cols + 1];
+            colX[0] = startX;
+            for (int i = 0; i < cols; i++)
+                colX[i + 1] = colX[i] + colWidths[i];
+
+            double y = startY;
+            var font = new XFont("Verdana", 11);
+
+            // 1) Nagłówki
+            for (int i = 0; i < cols; i++)
+            {
+                var rect = new XRect(colX[i] - 1, y, colWidths[i] - 2, rowHeight);
+                var fmt = (i == 0) ? XStringFormats.CenterLeft : XStringFormats.CenterRight;
+                gfx.DrawString(headers[i], font, XBrushes.Black, rect, fmt);
+            }
+            y += rowHeight;
+
+            // linia pod nagłówkami
+            gfx.DrawLine(XPens.Black, startX, y, startX + totalWidth, y);
+            y += 5;
+
+            // 2) Wiersze danych
+            bool shade = false;
+            foreach (var (Name, Qty, Price, LineTotal) in rows)
+            {
+                // naprzemienne cieniowanie
+                if (shade)
+                    gfx.DrawRectangle(XBrushes.LightGray, startX, y, totalWidth, rowHeight);
+                shade = !shade;
+
+                // ramka wiersza
+                gfx.DrawRectangle(XPens.Gray, startX, y, totalWidth, rowHeight);
+
+                // wartości, każda w swojej kolumnie, wyśrodkowane w pionie
+                gfx.DrawString(Name, font, XBrushes.Black,
+                    new XRect(colX[0] + 4, y, colWidths[0] - 8, rowHeight),
+                    XStringFormats.CenterLeft);
+
+                gfx.DrawString(Qty.ToString(), font, XBrushes.Black,
+                    new XRect(colX[1], y, colWidths[1], rowHeight),
+                    XStringFormats.CenterRight);
+
+                gfx.DrawString($"{Price:C}", font, XBrushes.Black,
+                    new XRect(colX[2], y, colWidths[2], rowHeight),
+                    XStringFormats.CenterRight);
+
+                gfx.DrawString($"{LineTotal:C}", font, XBrushes.Black,
+                    new XRect(colX[3] - 2, y, colWidths[3] - 4, rowHeight),
+                    XStringFormats.CenterRight);
+
+                y += rowHeight;
+            }
+
+            return y + 5; // zwracamy pozycję końcową + mały odstęp
+        }
         public static void ExportStatistics(ProductViewModel viewModel)
         {
             var top = viewModel.GetTopSellingProducts();
@@ -98,7 +272,7 @@ namespace SklepInternetowyWPF.Utils
             string filePath = Path.Combine(folder, $"{filenamePrefix}_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
 
             doc.Save(filePath);
-            Process.Start("explorer.exe", filePath);
+            Process.Start("explorer.exe", $"\"{filePath}\"");
         }
     }
 }
