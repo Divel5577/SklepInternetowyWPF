@@ -12,7 +12,6 @@
     </Window.Resources>
 
     <DockPanel Margin="10">
-
         <!-- Lista produktów -->
         <ListView ItemsSource="{Binding CartItems}" DockPanel.Dock="Top" Height="282" Margin="0,0,0,10">
             <ListView.View>
@@ -36,20 +35,22 @@
 
             <!-- Przyciski -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,0,0">
-                <Button Content="Złóż zamówienie"
-                        Width="120"
+                <Button Content="Przejdź do kasy"
+                        Width="140"
                         Height="30"
                         Margin="5"
                         Click="PlaceOrder_Click"
                         Background="#90C4E4"
                         Foreground="#1B1C2E"/>
+
                 <Button Content="Eksportuj do PDF"
-                        Width="120"
+                        Width="130"
                         Height="30"
                         Margin="5"
                         Click="ExportToPdf_Click"
                         Background="#9AD4D6"
                         Foreground="#1B1C2E"/>
+
                 <Button Content="Wyczyść"
                         Width="80"
                         Height="30"

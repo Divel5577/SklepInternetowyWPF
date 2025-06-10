@@ -32,7 +32,15 @@ namespace SklepInternetowyWPF.ViewModels
             string createOrders = @"CREATE TABLE IF NOT EXISTS Orders (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 Username TEXT NOT NULL,
-                Date TEXT NOT NULL
+                Date TEXT NOT NULL,
+                FirstName TEXT,
+                LastName TEXT,
+                Phone TEXT,
+                Street TEXT,
+                PostalCode TEXT,
+                City TEXT,
+                Notes TEXT,
+                PaymentMethod TEXT
             );";
 
             string createOrderItems = @"CREATE TABLE IF NOT EXISTS OrderItems (
@@ -46,8 +54,8 @@ namespace SklepInternetowyWPF.ViewModels
 
             new SQLiteCommand(createOrders, connection).ExecuteNonQuery();
             new SQLiteCommand(createOrderItems, connection).ExecuteNonQuery();
-            connection.Close();
         }
+
         public bool AddToCart(Product product)
         {
             int totalInCart = CartItems.Where(x => x.Product.Id == product.Id).Sum(x => x.Quantity);
@@ -73,16 +81,27 @@ namespace SklepInternetowyWPF.ViewModels
             OnPropertyChanged(nameof(Total));
         }
 
-        public void PlaceOrder()
+        public void PlaceOrder(string firstName, string lastName, string phone, string street, string postalCode, string city, string notes, string paymentMethod)
         {
             if (CartItems.Count == 0) return;
 
             var connection = new SQLiteConnection(_connectionString);
             connection.Open();
 
-            var insertOrder = new SQLiteCommand("INSERT INTO Orders (Username, Date) VALUES (@Username, @Date);", connection);
+            var insertOrder = new SQLiteCommand(@"
+                INSERT INTO Orders (Username, Date, FirstName, LastName, Phone, Street, PostalCode, City, Notes, PaymentMethod)
+                VALUES (@Username, @Date, @FirstName, @LastName, @Phone, @Street, @PostalCode, @City, @Notes, @PaymentMethod);", connection);
+
             insertOrder.Parameters.AddWithValue("@Username", CurrentUsername);
             insertOrder.Parameters.AddWithValue("@Date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+            insertOrder.Parameters.AddWithValue("@FirstName", firstName);
+            insertOrder.Parameters.AddWithValue("@LastName", lastName);
+            insertOrder.Parameters.AddWithValue("@Phone", phone);
+            insertOrder.Parameters.AddWithValue("@Street", street);
+            insertOrder.Parameters.AddWithValue("@PostalCode", postalCode);
+            insertOrder.Parameters.AddWithValue("@City", city);
+            insertOrder.Parameters.AddWithValue("@Notes", notes);
+            insertOrder.Parameters.AddWithValue("@PaymentMethod", paymentMethod);
             insertOrder.ExecuteNonQuery();
 
             long orderId = connection.LastInsertRowId;
@@ -95,23 +114,19 @@ namespace SklepInternetowyWPF.ViewModels
                 insertItem.Parameters.AddWithValue("@Quantity", item.Quantity);
                 insertItem.ExecuteNonQuery();
 
-                // 🔄 Zmniejsz stock
                 var updateStock = new SQLiteCommand("UPDATE Products SET Stock = Stock - @Quantity WHERE Id = @ProductId;", connection);
                 updateStock.Parameters.AddWithValue("@Quantity", item.Quantity);
                 updateStock.Parameters.AddWithValue("@ProductId", item.Product.Id);
                 updateStock.ExecuteNonQuery();
             }
 
-
-            connection.Close();
             ClearCart();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged(string name)
         {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(name));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
     }
 }

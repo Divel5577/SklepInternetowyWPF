@@ -85,15 +85,9 @@
                 </StackPanel>
 
                 <!-- Admin -->
-                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Margin="20,0,0,0">
-                    <Button x:Name="AddButton" Content="Dodaj produkt" Height="30" Width="120" Margin="5" Click="AddProduct_Click"
-                            Background="#90C4E4" Foreground="#1B1C2E"/>
-                    <Button x:Name="EditButton" Content="Edytuj produkt" Height="30" Width="120" Margin="5" Click="EditProduct_Click"
-                            Background="#90C4E4" Foreground="#1B1C2E"/>
-                    <Button x:Name="DeleteButton" Content="Usuń produkt" Height="30" Width="120" Margin="5" Click="DeleteProduct_Click"
-                            Background="#90C4E4" Foreground="#1B1C2E"/>
-                    <Button x:Name="StatsButton" Content="Statystyki" Height="30" Width="120" Margin="5" Click="StatsButton_Click"
-                            Background="#90C4E4" Foreground="#1B1C2E" Visibility="Collapsed"/>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Margin="20,0,0,0" Width="150">
+                    <Button Content="Panel admina" Height="30" Width="120" Click="AdminPanel_Click"
+                        Background="#90C4E4" Foreground="#1B1C2E"  x:Name="AdminPanelButton"/>
                 </StackPanel>
 
                 <!-- Koszyk -->

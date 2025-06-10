@@ -26,16 +26,6 @@ namespace SklepInternetowyWPF.Views
             UpdatePermissionUI();
         }
 
-        private void AddProduct_Click(object sender, RoutedEventArgs e)
-        {
-            var product = new Product();
-            var window = new EditProductWindow(product);
-            if (window.ShowDialog() == true)
-            {
-                viewModel.SaveProduct(product);
-            }
-        }
-
         private void EditProduct_Click(object sender, RoutedEventArgs e)
         {
             if (ProductList.SelectedItem is Product selected)
@@ -74,15 +64,6 @@ namespace SklepInternetowyWPF.Views
                         viewModel.LoadProducts(); 
                     }
                 }
-            }
-        }
-
-
-        private void DeleteProduct_Click(object sender, RoutedEventArgs e)
-        {
-            if (ProductList.SelectedItem is Product selected)
-            {
-                viewModel.DeleteProduct(selected);
             }
         }
 
@@ -189,11 +170,12 @@ namespace SklepInternetowyWPF.Views
                 }
             }
         }
-        private void StatsButton_Click(object sender, RoutedEventArgs e)
+        private void AdminPanel_Click(object sender, RoutedEventArgs e)
         {
-            var statsWindow = new StatisticsWindow(viewModel);
-            statsWindow.ShowDialog();
+            var panel = new AdminPanelWindow(viewModel);
+            panel.ShowDialog();
         }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             var storyboard = (Storyboard)this.Resources["FadeInStoryboard"];
@@ -204,10 +186,7 @@ namespace SklepInternetowyWPF.Views
         {
             bool isAdmin = viewModel.CurrentUser?.IsAdmin == true;
 
-            AddButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
-            EditButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
-            DeleteButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
-            StatsButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
+            AdminPanelButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void ProductList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
