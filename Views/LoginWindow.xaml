@@ -22,11 +22,13 @@
                    Margin="0,0,0,5"
                    Foreground="#1B1C2E"
                    FontWeight="Bold"/>
-        <PasswordBox x:Name="PasswordBox" Margin="0,0,0,20"/>
+        <PasswordBox x:Name="PasswordBox" Margin="0,0,0,20" KeyDown="PasswordBox_KeyDown"/>
 
         <Button Content="Zaloguj"
+                x:Name="LoginButton"
                 Width="80"
                 Height="30"
+                IsDefault="True"
                 HorizontalAlignment="Center"
                 Click="Login_Click"
                 Background="#90C4E4"

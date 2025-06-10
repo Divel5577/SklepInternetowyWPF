@@ -5,9 +5,11 @@ using SklepInternetowyWPF.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Controls;
+using System.Windows.Forms.DataVisualization.Charting;
 using System.Windows.Media;
 
 namespace SklepInternetowyWPF.Utils
@@ -243,27 +245,99 @@ namespace SklepInternetowyWPF.Utils
         }
         public static void ExportStatistics(ProductViewModel viewModel)
         {
-            var top = viewModel.GetTopSellingProducts();
-
+            // 1) Przygotuj dokument PDF
             var doc = new PdfDocument();
-            doc.Info.Title = "Statystyki";
+            doc.Info.Title = $"StatystykiSprzedazy_{DateTime.Now:yyyyMMdd_HHmmss}";
 
+            // 2) Dodaj stronę i XGraphics
             var page = doc.AddPage();
             var gfx = XGraphics.FromPdfPage(page);
-            var font = new XFont("Verdana", 12);
-            double y = 40;
-            gfx.DrawString("Najczęściej kupowane produkty", new XFont("Verdana", 16, XFontStyle.Bold), XBrushes.Black, 20, y);
+
+            const double margin = 20;
+            double y = margin;
+
+            // 3) Nagłówek
+            var headerFont = new XFont("Verdana", 16, XFontStyle.Bold);
+            gfx.DrawString(
+                "Najczęściej kupowane produkty",
+                headerFont,
+                XBrushes.Black,
+                new XPoint(margin, y)
+            );
             y += 30;
 
-            foreach (var item in top)
+            // 4) Stwórz wykres WinForms w pamięci
+            var data = viewModel
+                .GetTopSellingProducts()
+                .Select(x => new { x.ProductName, x.TotalQuantitySold })
+                .ToList();
+
+            using (var chart = new Chart())
             {
-                string line = $"{item.ProductName} - {item.TotalQuantitySold} szt.";
-                gfx.DrawString(line, font, XBrushes.Black, 20, y);
-                y += 20;
+                // rozmiar wykresu odpowiada szerokości PDF minus marginesy, 300px wysokości
+                int chartWidth = (int)(page.Width - 2 * margin);
+                int chartHeight = 300;
+                chart.Size = new Size(chartWidth, chartHeight);
+                chart.BackColor = System.Drawing.Color.White;
+
+                // obszar wykresu
+                var area = new ChartArea("Default");
+                area.AxisX.Title = "Produkt";
+                area.AxisX.Interval = 1;
+                area.AxisY.Title = "Suma sprzedanych";
+                chart.ChartAreas.Add(area);
+
+                // seria słupkowa
+                var series = new Series("Sprzedaż")
+                {
+                    ChartType = SeriesChartType.Column,
+                    XValueMember = "ProductName",
+                    YValueMembers = "TotalQuantitySold",
+                    IsValueShownAsLabel = true
+                };
+                chart.Series.Add(series);
+
+                chart.DataSource = data;
+                chart.DataBind();
+
+                // 5) Renderuj wykres do bitmapy
+                using (var bmp = new Bitmap(chartWidth, chartHeight))
+                {
+                    chart.DrawToBitmap(bmp, new Rectangle(0, 0, chartWidth, chartHeight));
+
+                    // 6) Wczytaj bitmapę do XImage
+                    using (var ms = new MemoryStream())
+                    {
+                        bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                        ms.Position = 0;
+                        var img = XImage.FromStream(ms);
+
+                        // 7) Narysuj obraz na PDF
+                        gfx.DrawImage(
+                            img,
+                            margin,
+                            y,
+                            page.Width - 2 * margin,
+                            chartHeight
+                        );
+                    }
+                }
             }
 
+            // 8) Stopka z numeracją
+            var footerFont = new XFont("Verdana", 9, XFontStyle.Italic);
+            gfx.DrawString(
+                "Strona 1",
+                footerFont,
+                XBrushes.Gray,
+                new XRect(0, page.Height - margin / 2, page.Width, margin / 2),
+                XStringFormats.Center
+            );
+
+            // 9) Zapisz i otwórz
             SavePdf(doc, "StatystykiSprzedazy");
         }
+
 
         private static void SavePdf(PdfDocument doc, string filenamePrefix)
         {
