@@ -2,12 +2,16 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converters="clr-namespace:SklepInternetowyWPF.Converters"
+             xmlns:validators="clr-namespace:SklepInternetowyWPF.Validators"
              StartupUri="views/mainwindow.xaml">
     <Application.Resources>
         <converters:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:PathToImageConverter x:Key="PathToImageConverter"/>
         <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        <validators:PositiveDecimalValidationRule x:Key="PositiveDecimalValidationRule"/>
+        <validators:PositiveIntegerValidationRule x:Key="PositiveIntegerValidationRule"/>
+        <validators:RequiredFieldValidationRule x:Key="RequiredFieldValidationRule"/>
 
 
 
@@ -55,7 +59,15 @@
             </Setter>
         </Style>
 
-
+        <!-- Styl dla TextBoxów z walidacją -->
+        <Style TargetType="TextBox">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="BorderBrush" Value="Red"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
 
 
         <!-- FadeIn storyboard -->
