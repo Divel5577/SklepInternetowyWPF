@@ -1,4 +1,5 @@
-﻿using System.Data.SQLite;
+﻿using System;
+using System.Data.SQLite;
 using SklepInternetowyWPF.Models;
 
 namespace SklepInternetowyWPF.ViewModels
@@ -25,7 +26,9 @@ namespace SklepInternetowyWPF.ViewModels
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         Username TEXT NOT NULL UNIQUE,
                         Password TEXT NOT NULL,
-                        IsAdmin INTEGER NOT NULL
+                        IsAdmin INTEGER NOT NULL,
+                        LastWheelSpinDate TEXT,
+                        LastWheelDiscount    INTEGER
                     );";
 
                 using (var cmd = new SQLiteCommand(createUsers, connection))
@@ -54,7 +57,7 @@ namespace SklepInternetowyWPF.ViewModels
             using (var connection = new SQLiteConnection(_connectionString))
             {
                 connection.Open();
-                string sql = "SELECT Id, Username, Password, IsAdmin FROM Users WHERE Username = @Username AND Password = @Password";
+                string sql = "SELECT Id, Username, Password, IsAdmin, LastWheelSpinDate, LastWheelDiscount FROM Users WHERE Username = @Username AND Password = @Password";
                 using (var cmd = new SQLiteCommand(sql, connection))
                 {
                     cmd.Parameters.AddWithValue("@Username", username);
@@ -68,13 +71,55 @@ namespace SklepInternetowyWPF.ViewModels
                                 Id = reader.GetInt32(0),
                                 Username = reader.GetString(1),
                                 Password = reader.GetString(2),
-                                IsAdmin = reader.GetInt32(3) == 1
+                                IsAdmin = reader.GetInt32(3) == 1,
+                                LastWheelSpinDate = reader.IsDBNull(4)
+                                                       ? (DateTime?)null
+                                                       : DateTime.Parse(reader.GetString(4)),
+                                LastWheelDiscount = reader.IsDBNull(5)
+                                                ? 0
+                                                : reader.GetInt32(5)
                             };
                         }
                     }
                 }
             }
             return null;
+        }
+        public void UpdateLastSpinDate(string username, DateTime date)
+        {
+            using (var connection = new SQLiteConnection(_connectionString))
+            {
+                connection.Open();
+                string sql = @"
+          UPDATE Users
+             SET LastWheelSpinDate = @Date
+           WHERE Username = @Username";
+                using (var cmd = new SQLiteCommand(sql, connection))
+                {
+                    cmd.Parameters.AddWithValue("@Date", date.ToString("yyyy-MM-dd"));
+                    cmd.Parameters.AddWithValue("@Username", username);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+        public void UpdateUserWheel(string username, DateTime spinDate, int discount)
+        {
+            using (var connection = new SQLiteConnection(_connectionString))
+            {
+                connection.Open();
+                string sql = @"
+            UPDATE Users
+               SET LastWheelSpinDate = @D,
+                   LastWheelDiscount = @Disc
+             WHERE Username = @U";
+                using (var cmd = new SQLiteCommand(sql, connection))
+                {
+                    cmd.Parameters.AddWithValue("@D", spinDate.ToString("yyyy-MM-dd"));
+                    cmd.Parameters.AddWithValue("@Disc", discount);
+                    cmd.Parameters.AddWithValue("@U", username);
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
 
     }

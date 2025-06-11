@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.SQLite;
@@ -10,30 +11,27 @@ namespace SklepInternetowyWPF.ViewModels
     {
         private readonly string _connectionString = "Data Source=shop.db;Version=3;";
 
+        // Kolekcje produktów i kategorii
         public ObservableCollection<Product> Products { get; set; } = new ObservableCollection<Product>();
         public ObservableCollection<Category> Categories { get; set; } = new ObservableCollection<Category>();
         public User CurrentUser { get; set; }
 
+        // Przechowuje oryginalne ceny produktów (Id → Price)
+        private readonly Dictionary<int, decimal> _originalPrices = new Dictionary<int, decimal>();
+
+        // Filtry i sortowanie
         private string _searchText = "";
         public string SearchText
         {
             get => _searchText;
-            set
-            {
-                _searchText = value;
-                OnPropertyChanged(nameof(SearchText));
-            }
+            set { _searchText = value; OnPropertyChanged(nameof(SearchText)); }
         }
 
         private int _selectedCategoryId = 0;
         public int SelectedCategoryId
         {
             get => _selectedCategoryId;
-            set
-            {
-                _selectedCategoryId = value;
-                OnPropertyChanged(nameof(SelectedCategoryId));
-            }
+            set { _selectedCategoryId = value; OnPropertyChanged(nameof(SelectedCategoryId)); }
         }
 
         private string _sortBy = "Name";
@@ -62,6 +60,7 @@ namespace SklepInternetowyWPF.ViewModels
             }
         }
 
+        // Nagłówki kolumn z oznaczeniem kierunku sortowania
         public string NameHeader => SortBy == "Name" ? $"Nazwa {(SortDescending ? "▼" : "▲")}" : "Nazwa";
         public string PriceHeader => SortBy == "Price" ? $"Cena {(SortDescending ? "▼" : "▲")}" : "Cena";
 
@@ -80,27 +79,25 @@ namespace SklepInternetowyWPF.ViewModels
 
                 string createCategories = @"
                     CREATE TABLE IF NOT EXISTS Categories (
-                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        Name TEXT NOT NULL UNIQUE
+                        Id   INTEGER PRIMARY KEY AUTOINCREMENT,
+                        Name TEXT    NOT NULL UNIQUE
                     );";
 
                 string createProducts = @"
                     CREATE TABLE IF NOT EXISTS Products (
-                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        Name TEXT NOT NULL,
+                        Id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                        Name        TEXT    NOT NULL,
                         Description TEXT,
-                        Price REAL NOT NULL,
-                        Stock INTEGER NOT NULL,
-                        StockMax INTEGER NOT NULL,
-                        CategoryId INTEGER,
-                        ImagePath TEXT,
+                        Price       REAL    NOT NULL,
+                        Stock       INTEGER NOT NULL,
+                        StockMax    INTEGER NOT NULL,
+                        CategoryId  INTEGER,
+                        ImagePath   TEXT,
                         FOREIGN KEY (CategoryId) REFERENCES Categories(Id)
                     );";
 
-
                 using (var cmd = new SQLiteCommand(createCategories, connection))
                     cmd.ExecuteNonQuery();
-
                 using (var cmd = new SQLiteCommand(createProducts, connection))
                     cmd.ExecuteNonQuery();
             }
@@ -112,19 +109,15 @@ namespace SklepInternetowyWPF.ViewModels
             using (var connection = new SQLiteConnection(_connectionString))
             {
                 connection.Open();
-                string sql = "SELECT * FROM Categories";
+                string sql = "SELECT Id, Name FROM Categories";
                 using (var cmd = new SQLiteCommand(sql, connection))
                 using (var reader = cmd.ExecuteReader())
-                {
                     while (reader.Read())
-                    {
                         Categories.Add(new Category
                         {
                             Id = reader.GetInt32(0),
                             Name = reader.GetString(1)
                         });
-                    }
-                }
             }
 
             if (Categories.Count == 0)
@@ -147,26 +140,23 @@ namespace SklepInternetowyWPF.ViewModels
                 string orderDirection = SortDescending ? "DESC" : "ASC";
 
                 string sql = $@"
-                    SELECT p.Id, p.Name, p.Description, p.Price, p.Stock, p.StockMax, c.Id, c.Name, p.ImagePath
+                    SELECT p.Id, p.Name, p.Description, p.Price, p.Stock, p.StockMax,
+                           p.CategoryId, c.Name, p.ImagePath
                     FROM Products p
                     LEFT JOIN Categories c ON p.CategoryId = c.Id
                     WHERE (@Search = '' OR p.Name LIKE @Search)
                       AND (@CategoryId = 0 OR p.CategoryId = @CategoryId)
-                    ORDER BY {orderColumn} {orderDirection}";
+                    ORDER BY {orderColumn} {orderDirection};";
 
                 using (var cmd = new SQLiteCommand(sql, connection))
                 {
-                    string search = SearchText ?? "";
-                    int categoryId = SelectedCategoryId;
-
-                    cmd.Parameters.AddWithValue("@Search", $"%{search}%");
-                    cmd.Parameters.AddWithValue("@CategoryId", categoryId);
+                    cmd.Parameters.AddWithValue("@Search", $"%{SearchText}%");
+                    cmd.Parameters.AddWithValue("@CategoryId", SelectedCategoryId);
 
                     using (var reader = cmd.ExecuteReader())
-                    {
                         while (reader.Read())
                         {
-                            Products.Add(new Product
+                            var prod = new Product
                             {
                                 Id = reader.GetInt32(0),
                                 Name = reader.GetString(1),
@@ -177,9 +167,13 @@ namespace SklepInternetowyWPF.ViewModels
                                 CategoryId = reader.IsDBNull(6) ? 0 : reader.GetInt32(6),
                                 CategoryName = reader.IsDBNull(7) ? "" : reader.GetString(7),
                                 ImagePath = reader.IsDBNull(8) ? null : reader.GetString(8)
-                            });
+                            };
+                            Products.Add(prod);
+
+                            // zapamiętaj oryginalną cenę produktu
+                            if (!_originalPrices.ContainsKey(prod.Id))
+                                _originalPrices[prod.Id] = prod.Price;
                         }
-                    }
                 }
             }
 
@@ -193,9 +187,13 @@ namespace SklepInternetowyWPF.ViewModels
             {
                 connection.Open();
                 string sql = product.Id == 0
-                    ? "INSERT INTO Products (Name, Description, Price, CategoryId, Stock, StockMax, ImagePath) VALUES (@Name, @Description, @Price, @CategoryId, @Stock, @StockMax, @ImagePath)"
-                    : "UPDATE Products SET Name = @Name, Description = @Description, Price = @Price, CategoryId = @CategoryId, Stock = @Stock, StockMax = @StockMax, ImagePath = @ImagePath WHERE Id = @Id";
-
+                    ? @"INSERT INTO Products
+                          (Name, Description, Price, CategoryId, Stock, StockMax, ImagePath)
+                        VALUES (@Name, @Description, @Price, @CategoryId, @Stock, @StockMax, @ImagePath);"
+                    : @"UPDATE Products
+                        SET Name=@Name, Description=@Description, Price=@Price,
+                            CategoryId=@CategoryId, Stock=@Stock, StockMax=@StockMax, ImagePath=@ImagePath
+                        WHERE Id=@Id;";
 
                 using (var cmd = new SQLiteCommand(sql, connection))
                 {
@@ -214,13 +212,10 @@ namespace SklepInternetowyWPF.ViewModels
 
                     if (product.Id == 0)
                         product.Id = (int)connection.LastInsertRowId;
-                    if (product.StockMax == 0 || product.Stock > product.StockMax)
-                        product.StockMax = product.Stock;
-
                 }
             }
 
-            LoadProducts();
+            LoadProducts();  // ponownie załaduj, aby odświeżyć listę i oryginalne ceny
         }
 
         public void DeleteProduct(Product product)
@@ -228,7 +223,7 @@ namespace SklepInternetowyWPF.ViewModels
             using (var connection = new SQLiteConnection(_connectionString))
             {
                 connection.Open();
-                string sql = "DELETE FROM Products WHERE Id = @Id";
+                string sql = "DELETE FROM Products WHERE Id=@Id;";
                 using (var cmd = new SQLiteCommand(sql, connection))
                 {
                     cmd.Parameters.AddWithValue("@Id", product.Id);
@@ -244,7 +239,7 @@ namespace SklepInternetowyWPF.ViewModels
             using (var connection = new SQLiteConnection(_connectionString))
             {
                 connection.Open();
-                string sql = "INSERT OR IGNORE INTO Categories (Name) VALUES (@Name)";
+                string sql = "INSERT OR IGNORE INTO Categories (Name) VALUES (@Name);";
                 using (var cmd = new SQLiteCommand(sql, connection))
                 {
                     cmd.Parameters.AddWithValue("@Name", name);
@@ -252,45 +247,52 @@ namespace SklepInternetowyWPF.ViewModels
                 }
             }
         }
+
         public ObservableCollection<ProductStatistics> GetTopSellingProducts(int top = 10)
         {
             var results = new ObservableCollection<ProductStatistics>();
-
             using (var connection = new SQLiteConnection(_connectionString))
             {
                 connection.Open();
                 string sql = @"
-            SELECT p.Name, SUM(oi.Quantity) as TotalSold
-            FROM OrderItems oi
-            JOIN Products p ON p.Id = oi.ProductId
-            GROUP BY oi.ProductId
-            ORDER BY TotalSold DESC
-            LIMIT @Top";
-
+                    SELECT p.Name, SUM(oi.Quantity) AS TotalSold
+                    FROM OrderItems oi
+                    JOIN Products p ON p.Id = oi.ProductId
+                    GROUP BY oi.ProductId
+                    ORDER BY TotalSold DESC
+                    LIMIT @Top;";
                 using (var cmd = new SQLiteCommand(sql, connection))
                 {
                     cmd.Parameters.AddWithValue("@Top", top);
                     using (var reader = cmd.ExecuteReader())
-                    {
                         while (reader.Read())
-                        {
                             results.Add(new ProductStatistics
                             {
                                 ProductName = reader.GetString(0),
                                 TotalQuantitySold = reader.GetInt32(1)
                             });
-                        }
-                    }
                 }
             }
-
             return results;
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string propertyName)
+        /// <summary>
+        /// Zastosuj globalny rabat procentowy (0–100) do wszystkich produktów.
+        /// </summary>
+        public void ApplyGlobalDiscount(int percent)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            foreach (var p in Products)
+            {
+                if (_originalPrices.TryGetValue(p.Id, out var orig))
+                {
+                    p.Price = Math.Round(orig * (100 - percent) / 100m, 2);
+                }
+            }
+            OnPropertyChanged(nameof(Products));
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string name)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
