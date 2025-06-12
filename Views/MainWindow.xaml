@@ -89,7 +89,16 @@
                     <Button Content="Panel admina" Height="30" Width="120" Click="AdminPanel_Click"
                         Background="#90C4E4" Foreground="#1B1C2E"  x:Name="AdminPanelButton"/>
                 </StackPanel>
-
+                <!-- Losuj rabat -->
+                <Button x:Name="WheelButton"
+                        Content="Losuj rabat!"
+                        Width="100" Height="30"
+                        Background="#8A2BE2"
+                        Foreground="White"
+                        Margin="10,0,0,0"
+                        DockPanel.Dock="Right"
+                        Click="WheelOfFortune_Click"/>
+                
                 <!-- Koszyk -->
                 <Button Click="Cart_Click"
                         Width="30"

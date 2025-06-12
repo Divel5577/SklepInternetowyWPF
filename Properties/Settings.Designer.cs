@@ -22,5 +22,16 @@ namespace SklepInternetowyWPF.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.DateTime LastWheelSpinDate {
+            get {
+                return ((global::System.DateTime)(this["LastWheelSpinDate"]));
+            }
+            set {
+                this["LastWheelSpinDate"] = value;
+            }
+        }
     }
 }

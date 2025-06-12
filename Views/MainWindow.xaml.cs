@@ -150,10 +150,18 @@ namespace SklepInternetowyWPF.Views
                 var login = new LoginWindow();
                 if (login.ShowDialog() == true)
                 {
+                    // 1) Ustawiamy aktualnie zalogowanego
                     viewModel.CurrentUser = login.LoggedUser;
                     cartViewModel.CurrentUsername = login.LoggedUser.Username;
                     LoginButton.Content = "Konto";
                     UpdatePermissionUI();
+
+                    // 2) Przywracamy przechowany rabat, jeśli jest większy niż 0
+                    int savedDiscount = viewModel.CurrentUser.LastWheelDiscount;
+                    if (savedDiscount > 0)
+                    {
+                        viewModel.ApplyGlobalDiscount(savedDiscount);
+                    }
                 }
             }
             else
@@ -167,6 +175,7 @@ namespace SklepInternetowyWPF.Views
                     cartViewModel.CurrentUsername = "Gość";
                     LoginButton.Content = "Zaloguj się";
                     UpdatePermissionUI();
+                    viewModel.LoadProducts();
                 }
             }
         }
@@ -174,6 +183,24 @@ namespace SklepInternetowyWPF.Views
         {
             var panel = new AdminPanelWindow(viewModel);
             panel.ShowDialog();
+        }
+        private void WheelOfFortune_Click(object sender, RoutedEventArgs e)
+        {
+            // Sprawdź najpierw, czy user jest zalogowany
+            if (viewModel.CurrentUser == null)
+            {
+                MessageBox.Show(
+                    "Musisz być zalogowany, aby kręcić kołem fortuny.",
+                    "Brak dostępu",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            var win = new WheelOfFortuneWindow(viewModel, new UserViewModel())
+            {
+                Owner = this
+            };
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
