@@ -17,7 +17,6 @@ Animations & Styles: Fade-in effects, hover button styling.
 Project Structure
 
 SklepInternetowyWPF/
-
 ├─ App.xaml(.cs)             Application entry and login flow  
 ├─ Views/                    XAML windows (Main, Login, Cart, History, Stats, Wheel)  
 ├─ ViewModels/               MVVM logic (ProductViewModel, UserViewModel)  
