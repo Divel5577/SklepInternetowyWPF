@@ -55,8 +55,3 @@ Gracjan Czyżewski
 
 License
 MIT. See LICENSE file.
-
-
-
-
-
