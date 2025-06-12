@@ -1,4 +1,5 @@
 SklepInternetowyWPF
+
 A WPF desktop application (.NET Framework 4.7.2) for an online store with product browsing, cart, orders, PDF export and a “Wheel of Fortune” discount feature.
 
 Features
