@@ -1,31 +1,31 @@
-SklepInternetowyWPF
+###SklepInternetowyWPF###
 
 
 A WPF desktop application (.NET Framework 4.7.2) for an online store with product browsing, cart, orders, PDF export and a “Wheel of Fortune” discount feature.
 
 
 
-Features
+###Features###
 
-Product Catalog: Browse, search and sort products by name or price.
++Product Catalog: Browse, search and sort products by name or price.
 
-Categories: Filter by category or view all.
++Categories: Filter by category or view all.
 
-Shopping Cart & Orders: Add to cart, place orders, view order history.
++Shopping Cart & Orders: Add to cart, place orders, view order history.
 
-PDF Export: Generate styled PDFs for cart, order history and sales statistics.
++PDF Export: Generate styled PDFs for cart, order history and sales statistics.
 
-Sales Statistics: Top-selling products list.
++Sales Statistics: Top-selling products list.
 
-Wheel of Fortune: One daily spin for a global discount on product prices.
++Wheel of Fortune: One daily spin for a global discount on product prices.
 
-User Accounts: Login (admin/admin123, user/user123), role-based UI (admin panel).
++User Accounts: Login (admin, user), role-based UI (admin panel).
 
-Animations & Styles: Fade-in effects, hover button styling.
++Animations & Styles: Fade-in effects, hover button styling.
 
 
 
-Project Structure
+###Project Structure###
 
 
 SklepInternetowyWPF/
@@ -42,44 +42,44 @@ SklepInternetowyWPF/
 
 
 
-Setup
+###Setup###
 
 
-Clone
++Clone
 git clone https://github.com/Divel5577/SklepInternetowyWPF.git
 
-Open in Visual Studio and restore NuGet packages.
++Open in Visual Studio and restore NuGet packages.
 
-Run (F5). On first launch you’ll see the login window.
-
-
-
-Usage
-
-
-Login: Use admin/admin123 or user/user123.
-
-Browse: Filter and sort products.
-
-Cart: Add items, review and place orders.
-
-History: View past orders and export to PDF.
-
-Stats: View/export top-selling products (admin).
-
-Wheel: Spin once per day for a discount that applies until midnight.
++Run (F5). On first launch you’ll see the login window.
 
 
 
-Contributors
+###Usage###
 
 
-Patryk Dulkowski
++Login: Use admin/admin123 or user/user123.
 
-Gracjan Czyżewski
++Browse: Filter and sort products.
+
++Cart: Add items, review and place orders.
+
++History: View past orders and export to PDF.
+
++Stats: View/export top-selling products (admin).
+
++Wheel: Spin once per day for a discount that applies until midnight.
 
 
 
-License
+###Contributors###
+
+
++Patryk Dulkowski
+
++Gracjan Czyżewski
+
+
+
+###License###
 
 MIT. See LICENSE file.
