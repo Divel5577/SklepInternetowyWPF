@@ -106,10 +106,13 @@ namespace SklepInternetowyWPF.ViewModels
         public void LoadCategories()
         {
             Categories.Clear();
+            // dodajemy zawsze opcję "Wszystkie"
+            Categories.Add(new Category { Id = 0, Name = "Wszystkie" });
+
             using (var connection = new SQLiteConnection(_connectionString))
             {
                 connection.Open();
-                string sql = "SELECT Id, Name FROM Categories";
+                string sql = "SELECT Id, Name FROM Categories ORDER BY Name";
                 using (var cmd = new SQLiteCommand(sql, connection))
                 using (var reader = cmd.ExecuteReader())
                     while (reader.Read())
@@ -119,19 +122,31 @@ namespace SklepInternetowyWPF.ViewModels
                             Name = reader.GetString(1)
                         });
             }
-
+            // Jeśli brak kategorii w bazie, dodaj domyślne i przeładuj
             if (Categories.Count == 0)
             {
                 AddCategory("Spożywcze");
                 AddCategory("Elektronika");
                 AddCategory("Ubrania");
                 LoadCategories();
+                return;
             }
+
+            // jeśli nie wybrałeś, to domyślnie "Wszystkie"
+            SelectedCategoryId = 0;
         }
 
         public void LoadProducts()
         {
             Products.Clear();
+
+            // jeżeli wpisano "nic" to traktujemy jak pusty search
+            var search = (SearchText ?? "").Trim();
+            if (string.Equals(search, "nic", StringComparison.OrdinalIgnoreCase))
+                search = "";
+            // dla SQL: p.Name LIKE @Search -> z %...%
+            var searchParam = $"%{search}%";
+
             using (var connection = new SQLiteConnection(_connectionString))
             {
                 connection.Open();
@@ -140,17 +155,17 @@ namespace SklepInternetowyWPF.ViewModels
                 string orderDirection = SortDescending ? "DESC" : "ASC";
 
                 string sql = $@"
-                    SELECT p.Id, p.Name, p.Description, p.Price, p.Stock, p.StockMax,
-                           p.CategoryId, c.Name, p.ImagePath
-                    FROM Products p
-                    LEFT JOIN Categories c ON p.CategoryId = c.Id
-                    WHERE (@Search = '' OR p.Name LIKE @Search)
-                      AND (@CategoryId = 0 OR p.CategoryId = @CategoryId)
-                    ORDER BY {orderColumn} {orderDirection};";
+            SELECT p.Id, p.Name, p.Description, p.Price, p.Stock, p.StockMax,
+                   p.CategoryId, c.Name, p.ImagePath
+              FROM Products p
+              LEFT JOIN Categories c ON p.CategoryId = c.Id
+             WHERE (@Search = '%%' OR p.Name LIKE @Search)
+               AND (@CategoryId = 0 OR p.CategoryId = @CategoryId)
+             ORDER BY {orderColumn} {orderDirection};";
 
                 using (var cmd = new SQLiteCommand(sql, connection))
                 {
-                    cmd.Parameters.AddWithValue("@Search", $"%{SearchText}%");
+                    cmd.Parameters.AddWithValue("@Search", searchParam);
                     cmd.Parameters.AddWithValue("@CategoryId", SelectedCategoryId);
 
                     using (var reader = cmd.ExecuteReader())
@@ -170,7 +185,6 @@ namespace SklepInternetowyWPF.ViewModels
                             };
                             Products.Add(prod);
 
-                            // zapamiętaj oryginalną cenę produktu
                             if (!_originalPrices.ContainsKey(prod.Id))
                                 _originalPrices[prod.Id] = prod.Price;
                         }

@@ -68,6 +68,7 @@ public class Product : INotifyPropertyChanged
 
     [NotMapped]
     private string _categoryName;
+    [NotMapped]
     public string CategoryName
     {
         get => _categoryName;
@@ -125,6 +126,7 @@ public class Product : INotifyPropertyChanged
         }
     }
 
+    [NotMapped]
     public string StockDescription
     {
         get

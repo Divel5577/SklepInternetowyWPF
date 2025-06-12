@@ -66,21 +66,14 @@ namespace SklepInternetowyWPF.Views
                 }
             }
         }
-
         private void Search_Click(object sender, RoutedEventArgs e)
         {
             string query = SearchBox.Text.Trim();
-            if (string.IsNullOrEmpty(query))
-            {
-                MessageBox.Show("Wprowadź nazwę produktu do wyszukania.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
 
             viewModel.SearchText = query;
             viewModel.SelectedCategoryId = (int)(CategoryFilterBox.SelectedValue ?? 0);
             viewModel.LoadProducts();
         }
-
 
         private void SortByName_Click(object sender, RoutedEventArgs e)
         {
@@ -176,6 +169,7 @@ namespace SklepInternetowyWPF.Views
                     LoginButton.Content = "Zaloguj się";
                     UpdatePermissionUI();
                     viewModel.LoadProducts();
+                    ResetFilters();
                 }
             }
         }
@@ -214,6 +208,19 @@ namespace SklepInternetowyWPF.Views
             bool isAdmin = viewModel.CurrentUser?.IsAdmin == true;
 
             AdminPanelButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
+        }
+        private void ResetFilters()
+        {
+            // ViewModel
+            viewModel.SearchText = "";
+            viewModel.SelectedCategoryId = 0;
+            viewModel.SortBy = "Name";
+            viewModel.SortDescending = false;
+            viewModel.LoadProducts();
+
+            // UI
+            SearchBox.Text = "";
+            CategoryFilterBox.SelectedIndex = 0;
         }
 
         private void ProductList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
