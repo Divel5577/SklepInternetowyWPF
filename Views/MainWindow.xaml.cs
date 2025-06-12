@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media.Animation;
 using SklepInternetowyWPF.Data;
@@ -146,33 +147,41 @@ namespace SklepInternetowyWPF.Views
                     // 1) Ustawiamy aktualnie zalogowanego
                     viewModel.CurrentUser = login.LoggedUser;
                     cartViewModel.CurrentUsername = login.LoggedUser.Username;
-                    LoginButton.Content = "Konto";
+                    LoginButton.Content = $"Wyloguj się";
                     UpdatePermissionUI();
+                    ResetFilters();
 
-                    // 2) Przywracamy przechowany rabat, jeśli jest większy niż 0
-                    int savedDiscount = viewModel.CurrentUser.LastWheelDiscount;
-                    if (savedDiscount > 0)
+                    // 2) Przywracamy rabat tylko jeśli spin był dziś
+                    var spinDate = viewModel.CurrentUser.LastWheelSpinDate;
+                    var discount = viewModel.CurrentUser.LastWheelDiscount;
+                    if (spinDate.HasValue && spinDate.Value.Date == DateTime.Today && discount > 0)
                     {
-                        viewModel.ApplyGlobalDiscount(savedDiscount);
+                        viewModel.ApplyGlobalDiscount(discount);
+                    }
+                    else
+                    {
+                        // wygasły rabat — wyzeruj w pamięci i w bazie
+                        viewModel.CurrentUser.LastWheelDiscount = 0;
+                        var uvm = new UserViewModel();
+                        uvm.UpdateUserWheel(
+                            viewModel.CurrentUser.Username,
+                            spinDate ?? DateTime.Today,
+                            0
+                        );
                     }
                 }
             }
             else
             {
-                var account = new AccountWindow(viewModel.CurrentUser.Username);
-                account.ShowDialog();
-
-                if (account.LoggedOut)
-                {
-                    viewModel.CurrentUser = null;
-                    cartViewModel.CurrentUsername = "Gość";
-                    LoginButton.Content = "Zaloguj się";
-                    UpdatePermissionUI();
-                    viewModel.LoadProducts();
-                    ResetFilters();
-                }
+                // wylogowanie
+                viewModel.CurrentUser = null;
+                cartViewModel.CurrentUsername = "Gość";
+                LoginButton.Content = "Zaloguj się";
+                UpdatePermissionUI();
+                ResetFilters();
             }
         }
+
         private void AdminPanel_Click(object sender, RoutedEventArgs e)
         {
             var panel = new AdminPanelWindow(viewModel);
@@ -195,6 +204,7 @@ namespace SklepInternetowyWPF.Views
             {
                 Owner = this
             };
+            win.ShowDialog();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
