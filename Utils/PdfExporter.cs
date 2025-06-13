@@ -142,7 +142,7 @@ namespace SklepInternetowyWPF.Utils
                 gfx.DrawString("Razem:", sectionFont, XBrushes.Black,
                               new XPoint(margin + contentWidth * 0.75, y));
                 gfx.DrawString($"{order.Total:C}", sectionFont, XBrushes.Black,
-                              new XPoint(margin + contentWidth * 0.89, y));
+                              new XPoint(margin + contentWidth * 0.87, y));
                 y += 30;
 
                 // jeśli zabrakło miejsca, nowa strona

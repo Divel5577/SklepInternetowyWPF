@@ -1,4 +1,4 @@
-﻿#define ENABLE_DAILY_LIMIT
+﻿//#define ENABLE_DAILY_LIMIT
 
 using System;
 using System.Linq;

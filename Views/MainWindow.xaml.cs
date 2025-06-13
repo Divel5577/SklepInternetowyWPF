@@ -141,17 +141,22 @@ namespace SklepInternetowyWPF.Views
         {
             if (viewModel.CurrentUser == null)
             {
+                // 1) Pokaż okno logowania
                 var login = new LoginWindow();
                 if (login.ShowDialog() == true)
                 {
-                    // 1) Ustawiamy aktualnie zalogowanego
+                    // 2) Ustawiamy aktualnie zalogowanego
                     viewModel.CurrentUser = login.LoggedUser;
                     cartViewModel.CurrentUsername = login.LoggedUser.Username;
-                    LoginButton.Content = $"Wyloguj się";
+
+                    // 3) Zmieniamy tekst przycisku na "Konto"
+                    LoginButton.Content = "Konto";
+
+                    // 4) Odświeżamy uprawnienia admina i filtry
                     UpdatePermissionUI();
                     ResetFilters();
 
-                    // 2) Przywracamy rabat tylko jeśli spin był dziś
+                    // 5) Przywracamy rabat, jeśli wylosowany dziś
                     var spinDate = viewModel.CurrentUser.LastWheelSpinDate;
                     var discount = viewModel.CurrentUser.LastWheelDiscount;
                     if (spinDate.HasValue && spinDate.Value.Date == DateTime.Today && discount > 0)
@@ -160,10 +165,9 @@ namespace SklepInternetowyWPF.Views
                     }
                     else
                     {
-                        // wygasły rabat — wyzeruj w pamięci i w bazie
+                        // wygasły lub brak rabatu — wyzeruj w bazie
                         viewModel.CurrentUser.LastWheelDiscount = 0;
-                        var uvm = new UserViewModel();
-                        uvm.UpdateUserWheel(
+                        new UserViewModel().UpdateUserWheel(
                             viewModel.CurrentUser.Username,
                             spinDate ?? DateTime.Today,
                             0
@@ -173,12 +177,18 @@ namespace SklepInternetowyWPF.Views
             }
             else
             {
-                // wylogowanie
-                viewModel.CurrentUser = null;
-                cartViewModel.CurrentUsername = "Gość";
-                LoginButton.Content = "Zaloguj się";
-                UpdatePermissionUI();
-                ResetFilters();
+                // 1) Pokaż okno konta zamiast od razu wylogowywać
+                var account = new AccountWindow(viewModel.CurrentUser.Username) { Owner = this };
+                account.ShowDialog();
+                if (account.LoggedOut)
+                {
+                    // 2) Wylogowanie
+                    viewModel.CurrentUser = null;
+                    cartViewModel.CurrentUsername = "Gość";
+                    LoginButton.Content = "Zaloguj się";
+                    UpdatePermissionUI();
+                    ResetFilters();
+                }
             }
         }
 
