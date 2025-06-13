@@ -351,9 +351,6 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\shop.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\cart.png" />
   </ItemGroup>
   <ItemGroup>
